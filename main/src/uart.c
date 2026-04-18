@@ -1,4 +1,4 @@
-#include <GPS.h>
+#include <uart.h>
 
 RMC_MSG_t GPS_data = {0};
 
@@ -20,7 +20,7 @@ void TaskGPS(void *pvParameters){
 
     ESP_ERROR_CHECK(uart_driver_install(UART_NUM_2, BUFFER_SIZE, BUFFER_SIZE, 0, NULL, 0));
     ESP_ERROR_CHECK(uart_param_config(UART_NUM_2, &uart_config));
-    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, 17, 16, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, TX_PIN, RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
     while(1){
         int length = uart_read_bytes(UART_NUM_2, buffer, (BUFFER_SIZE - 1), 5);

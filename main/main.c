@@ -5,7 +5,7 @@
  */
 
 #include <common.h>
-#include <GPS.h>
+#include <uart.h>
 
 void app_main(void){
     printf("SPI Slave starting...\n");
