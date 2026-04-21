@@ -8,4 +8,6 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 
+int64_t millis();
+
 #endif

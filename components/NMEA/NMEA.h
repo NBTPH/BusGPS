@@ -54,6 +54,8 @@ typedef struct{
 
 /* Checksum is the 8-bit exclusive OR of all characters in the sentence, including the ‘,’ 
 field delimiter, between but not including the ‘$’ and the ‘*’ delimiters. */
+uint8_t Ql_Check_XOR(const char *pData, unsigned int Length);
+
 bool Parse_RMC_MSG(const char *const p_start, unsigned int Length, RMC_MSG_t *msg_data);
 bool Parse_GGA_MSG(const char *const p_start, unsigned int Length, GGA_MSG_t *msg_data);
 
