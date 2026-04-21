@@ -1,7 +1,7 @@
 #ifndef GPS_H
 #define GPS_H
 
-#include <LC76G.h>
+#include <NMEA.h>
 #include "driver/uart.h"
 #include <common.h>
 

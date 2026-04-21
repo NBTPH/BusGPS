@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <uart.h>
+#include <i2c.h>
 #include "esp_timer.h"
 
 int64_t millis(){
@@ -20,7 +21,8 @@ void app_main(void){
     config.pin_bit_mask = 1ULL << GPIO_NUM_2;
     ESP_ERROR_CHECK(gpio_config(&config));
 
-    xTaskCreate(TaskGPS, "TaskGPS read", 4096, NULL, 2, NULL);
+    // xTaskCreate(TaskGPS, "TaskGPS read", 4096, NULL, 2, NULL);
+    xTaskCreate(TaskI2C, "TaskI2C read", 4096, NULL, 2, NULL);
     bool on = true;
     while(1){
         gpio_set_level(GPIO_NUM_2, on);

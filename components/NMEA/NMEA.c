@@ -1,4 +1,4 @@
-#include <LC76G.h>
+#include <NMEA.h>
 
 char* field_parse(char *out_buff, const size_t out_length, const char *start){ //start has to point at the start of an element, return is the pointer to the next comma
     memset(out_buff, 0, sizeof(char) * out_length);

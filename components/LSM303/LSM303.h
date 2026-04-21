@@ -9,6 +9,9 @@
 #include "driver/i2c_master.h"
 #include "esp_check.h"
 
+#define SENSORS_GRAVITY_EARTH (9.80665F)
+#define SENSORS_GRAVITY_STANDARD (SENSORS_GRAVITY_EARTH)
+
 #define LSM303_ADDRESS_ACCEL          (0x32 >> 1)         // 0011001x
 #define LSM303_ADDRESS_MAG            (0x3C >> 1)         // 0011110x
 
@@ -85,10 +88,10 @@ typedef enum{
 
 //Set of linear acceleration measurement ranges
 typedef enum range{
-    LSM303_RANGE_2G,  ///< Measurement range from +2G to -2G (19.61 m/s^2)
-    LSM303_RANGE_4G,  ///< Measurement range from +4G to -4G (39.22 m/s^2)
-    LSM303_RANGE_8G,  ///< Measurement range from +8G to -8G (78.45 m/s^2)
-    LSM303_RANGE_16G, ///< Measurement range from +16G to -16G (156.9 m/s^2)
+    LSM303_RANGE_2G = 0b00,  ///< Measurement range from +2G to -2G (19.61 m/s^2)
+    LSM303_RANGE_4G = 0b01,  ///< Measurement range from +4G to -4G (39.22 m/s^2)
+    LSM303_RANGE_8G = 0b10,  ///< Measurement range from +8G to -8G (78.45 m/s^2)
+    LSM303_RANGE_16G = 0b11, ///< Measurement range from +16G to -16G (156.9 m/s^2)
 }lsm303_accel_range_t;
 
 //Set of different modes that can be used. Normal, high resolution, and low power
@@ -97,6 +100,19 @@ typedef enum mode {
     LSM303_MODE_HIGH_RESOLUTION, ///< High resolution mode; 12-bit
     LSM303_MODE_LOW_POWER,       ///< Low power mode; 8-bit
 }lsm303_accel_mode_t;
+
+//Set of different data rates that can be used.
+typedef enum datarate {
+    LSM303_DATARATE_1 = 1,
+    LSM303_DATARATE_10 = 2,
+    LSM303_DATARATE_25 = 3,
+    LSM303_DATARATE_50 = 4,
+    LSM303_DATARATE_100 = 5,
+    LSM303_DATARATE_200 = 6,
+    LSM303_DATARATE_400 = 7,
+    LSM303_DATARATE_LOWPOWER_1620 = 8,
+    LSM303_DATARATE_1344_LOWPOWER_5376 = 9,
+}lsm303_accel_datarate_t;
 
 //INTERNAL MAGNETOMETER DATA TYPE
 typedef struct lsm303MagData_s{
@@ -114,13 +130,8 @@ typedef struct lsm303AccelData_s{
 
 #define LSM303_ID                     (0b11010100)
 
-void write8(uint8_t reg_addr, uint8_t data);
-void read8(uint8_t reg_addr, uint8_t *data);
+bool LSM303_init(i2c_master_dev_handle_t *input_i2c_MagDev, i2c_master_dev_handle_t *input_i2c_AccelDev);
 
-void write_bytes(uint8_t reg_addr, uint8_t *data, size_t length);
-void read_bytes(uint8_t reg_addr, uint8_t *data, size_t length);
-
-bool LSM303_init(i2c_master_dev_handle_t i2c_dev);
-
+bool get_Accel_Data(float *x, float *y, float *z);
 
 #endif
