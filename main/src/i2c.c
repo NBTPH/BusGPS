@@ -44,6 +44,9 @@ void TaskI2C(void *pvParameters){
     while(1){
         get_Accel_Data(&x, &y, &z);
         printf("ACCEL X: %5f Y: %5f Z: %5f\r\n", x, y, z);
+        if(get_Mag_Data(&x, &y, &z)){
+            printf("MAG X: %5f Y: %5f Z: %5f\r\n\n\n", x, y, z);
+        }
         vTaskDelay(pdMS_TO_TICKS(250));
     }
 }

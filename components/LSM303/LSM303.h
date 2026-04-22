@@ -78,7 +78,7 @@ typedef enum{
 typedef enum{
     LSM303_MAGRATE_0_7                        = 0x00,  // 0.75 Hz
     LSM303_MAGRATE_1_5                        = 0x01,  // 1.5 Hz
-    LSM303_MAGRATE_3_0                        = 0x62,  // 3.0 Hz
+    LSM303_MAGRATE_3_0                        = 0x02,  // 3.0 Hz
     LSM303_MAGRATE_7_5                        = 0x03,  // 7.5 Hz
     LSM303_MAGRATE_15                         = 0x04,  // 15 Hz
     LSM303_MAGRATE_30                         = 0x05,  // 30 Hz
@@ -133,5 +133,7 @@ typedef struct lsm303AccelData_s{
 bool LSM303_init(i2c_master_dev_handle_t *input_i2c_MagDev, i2c_master_dev_handle_t *input_i2c_AccelDev);
 
 bool get_Accel_Data(float *x, float *y, float *z);
+
+bool get_Mag_Data(float *x, float *y, float *z);
 
 #endif
