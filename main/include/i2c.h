@@ -1,7 +1,7 @@
 #ifndef I2C_H
 #define I2C_H
 
-#include <LSM303.h>
+#include <MPU6050.h>
 #include "driver/i2c_master.h"
 #include <common.h>
 
