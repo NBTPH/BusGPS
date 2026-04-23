@@ -3,7 +3,7 @@
 RMC_MSG_t GPS_RMC_data = {0};
 GGA_MSG_t GPS_GGA_data = {0};
 
-void TaskGPS(void *pvParameters){
+void TaskUART(void *pvParameters){
     printf("UART task start\n");
 
     const int BUFFER_SIZE = 2048;

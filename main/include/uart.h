@@ -11,6 +11,6 @@
 extern RMC_MSG_t GPS_RMC_data;
 extern GGA_MSG_t GPS_GGA_data;
 
-void TaskGPS(void *pvParameters);
+void TaskUART(void *pvParameters);
 
 #endif
