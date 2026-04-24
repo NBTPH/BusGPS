@@ -14,19 +14,16 @@
  *	BSD license (see license.txt)
  */
 
-#ifndef _MPU6050_H
-#define _MPU6050_H
+#ifndef _HMC5883_H
+#define _HMC5883_H
 
-#include "driver/i2c_master.h"
+#define HMC5883_ADDRESS_MAG (0x3C >> 1) // 0011110x
 
-#define MPU6050_I2CADDR_DEFAULT 0x68 ///< MPU6050 default i2c address w/ AD0 low
+bool HMC5883_Init(i2c_master_dev_handle_t *input_hmc5883_dev);
 
-bool MPU6050_Init(i2c_master_dev_handle_t *input_mpu6050_dev);
+void getMagData(float *x, float *y, float *z);
 
-void getAccelerometerData(float *x, float *y, float *z);
-void getGyroData(float *x, float *y, float *z);
-
-bool MPU6050_DataReady(void);
+bool HMC5883_DataReady(void);
 
 // mpu6050_accel_range_t getAccelerometerRange(void);
 // void setAccelerometerRange(mpu6050_accel_range_t);

@@ -1,3 +1,4 @@
+#include <MPU6050_U.h>
 #include <MPU6050.h>
 
 i2c_master_dev_handle_t *mpu6050_dev_p = NULL;
@@ -26,8 +27,11 @@ uint8_t getSampleRateDivisor(void){
     read8(MPU6050_SMPLRT_DIV, &reg);
     return reg;
 }
-void setSampleRateDivisor(uint8_t divisor) {
+bool setSampleRateDivisor(uint8_t divisor) {
     write8(MPU6050_SMPLRT_DIV, divisor);
+    uint8_t check = 0;
+    read8(MPU6050_SMPLRT_DIV, &check);
+    return (check == divisor);
 }
 
 mpu6050_accel_range_t getAccelerometerRange(void){
@@ -38,12 +42,16 @@ mpu6050_accel_range_t getAccelerometerRange(void){
     return reg;
 }
 
-void setAccelerometerRange(mpu6050_accel_range_t range){
+bool setAccelerometerRange(mpu6050_accel_range_t range){
     uint8_t reg = 0;
     read8(MPU6050_ACCEL_CONFIG, &reg);
     reg &= ~(3 << 3); //clear 4th and 5th bits
-    reg |= (range << 3); //shifts range to the corresponding 
+    reg |= (range << 3); 
     write8(MPU6050_ACCEL_CONFIG, reg);
+
+    uint8_t check = 0;
+    read8(MPU6050_ACCEL_CONFIG, &check);
+    return ((check >> 3) & 0x03) == (uint8_t)range;
 }
 
 mpu6050_gyro_range_t getGyroRange(void){
@@ -53,15 +61,19 @@ mpu6050_gyro_range_t getGyroRange(void){
     reg = reg >> 3; //shifts back
     return reg;
 }
-void setGyroRange(mpu6050_gyro_range_t range){
+bool setGyroRange(mpu6050_gyro_range_t range){
     uint8_t reg = 0;
     read8(MPU6050_GYRO_CONFIG, &reg);
     reg &= ~(3 << 3); //clear 4th and 5th bits
     reg |= (range << 3); //sets the bits
     write8(MPU6050_GYRO_CONFIG, reg);
+
+    uint8_t check = 0;
+    read8(MPU6050_GYRO_CONFIG, &check);
+    return ((check >> 3) & 0x03) == (uint8_t)range;
 }
 
-void setInterruptPinPolarity(bool active_low){
+bool setInterruptPinPolarity(bool active_low){
     uint8_t reg = 0;
     read8(MPU6050_INT_PIN_CONFIG, &reg);
     reg &= ~(1 << 7); //clear 7th bit
@@ -69,8 +81,12 @@ void setInterruptPinPolarity(bool active_low){
         reg |= (1 << 7); //set 7th bit if we want active low
     }
     write8(MPU6050_INT_PIN_CONFIG, reg);
+
+    uint8_t check = 0;
+    read8(MPU6050_INT_PIN_CONFIG, &check);
+    return ((check >> 7) & 0x01) == active_low;
 }
-void setInterruptPinLatch(bool held){
+bool setInterruptPinLatch(bool held){
     uint8_t reg = 0;
     read8(MPU6050_INT_PIN_CONFIG, &reg);
     reg &= ~(1 << 5); //clear 5th bit
@@ -78,8 +94,12 @@ void setInterruptPinLatch(bool held){
         reg |= (1 << 5); //set 5th bit if we want interrupt to held
     }
     write8(MPU6050_INT_PIN_CONFIG, reg);
+
+    uint8_t check = 0;
+    read8(MPU6050_INT_PIN_CONFIG, &check);
+    return ((check >> 5) & 0x01) == held;
 }
-void setInterruptClear(bool read_clear){
+bool setInterruptClear(bool read_clear){
     uint8_t reg = 0;
     read8(MPU6050_INT_PIN_CONFIG, &reg);
     reg &= ~(1 << 4); //clear 5th bit
@@ -87,13 +107,21 @@ void setInterruptClear(bool read_clear){
         reg |= (1 << 4); //set 5th bit if we want interrupt to held
     }
     write8(MPU6050_INT_PIN_CONFIG, reg);
+
+    uint8_t check = 0;
+    read8(MPU6050_INT_PIN_CONFIG, &check);
+    return ((check >> 4) & 0x01) == read_clear;
 }
-void setFsyncSampleOutput(mpu6050_fsync_out_t fsync_output){
+bool setFsyncSampleOutput(mpu6050_fsync_out_t fsync_output){
     uint8_t reg = 0;
     read8(MPU6050_CONFIG, &reg);
     reg &= ~(7 << 3); //clear 4th, 5th and 6th bits
     reg |= (fsync_output << 3); //sets the bits
     write8(MPU6050_CONFIG, reg);
+
+    uint8_t check = 0;
+    read8(MPU6050_CONFIG, &check);
+    return ((check >> 3) & 0x07) == (uint8_t)fsync_output;
 }
 
 mpu6050_bandwidth_t getFilterBandwidth(void){
@@ -102,12 +130,16 @@ mpu6050_bandwidth_t getFilterBandwidth(void){
     reg &= 0x07; //extract first 3 bits
     return reg;
 }
-void setFilterBandwidth(mpu6050_bandwidth_t bandwidth){
+bool setFilterBandwidth(mpu6050_bandwidth_t bandwidth){
     uint8_t reg = 0;
     read8(MPU6050_CONFIG, &reg);
     reg &= ~(0x07); //clear the first 3 bits
     reg |= bandwidth; //set bits
     write8(MPU6050_CONFIG, reg);
+
+    uint8_t check = 0;
+    read8(MPU6050_CONFIG, &check);
+    return (check & 0x07) == (uint8_t)bandwidth;
 }
 
 
@@ -117,15 +149,19 @@ mpu6050_highpass_t getHighPassFilter(void){
     reg &= 3; //extract first 3 bits
     return reg;
 }
-void setHighPassFilter(mpu6050_highpass_t bandwidth){
+bool setHighPassFilter(mpu6050_highpass_t bandwidth){
     uint8_t reg = 0;
     read8(MPU6050_ACCEL_CONFIG, &reg);
     reg &= ~(0x03); //clear the first 3 bits
     reg |= bandwidth; //set bits
     write8(MPU6050_ACCEL_CONFIG, reg);
+
+    uint8_t check = 0;
+    read8(MPU6050_ACCEL_CONFIG, &check);
+    return (check & 0x07) == (uint8_t)bandwidth;
 }
 
-void setDRDYInterrupt(bool enable){
+bool setDRDYInterrupt(bool enable){
     uint8_t reg = 0;
     read8(MPU6050_INT_ENABLE, &reg);
     reg &= ~(0x01); //clear 1st bit
@@ -133,6 +169,17 @@ void setDRDYInterrupt(bool enable){
         reg |= 1; //set 1st bit if we want to enable DRDY interrupt
     }
     write8(MPU6050_INT_ENABLE, reg);
+
+    uint8_t check = 0;
+    read8(MPU6050_INT_ENABLE, &check);
+    return (check & 0x01) == enable;
+}
+
+bool MPU6050_DataReady(void){
+    uint8_t reg = 0;
+    read8(MPU6050_INT_STATUS, &reg);
+    reg &= 0x01; //extract first bit
+    return reg;
 }
 
 void setMotionInterrupt(bool active);
@@ -141,7 +188,19 @@ void setMotionDetectionDuration(uint8_t dur);
 bool getMotionInterruptStatus(void);
 
 mpu6050_fsync_out_t getFsyncSampleOutput(void);
-void setI2CBypass(bool bypass);
+
+bool setI2CBypass(bool bypass){
+    uint8_t reg = 0;
+    read8(MPU6050_INT_PIN_CONFIG, &reg);
+    reg &= ~(1 << 1); //clear 2nd bit
+    if(bypass)
+        reg |= (1 << 1); //set 2nd bit if we want to enable I2C bypass
+    write8(MPU6050_INT_PIN_CONFIG, reg);
+
+    uint8_t check = 0;
+    read8(MPU6050_INT_PIN_CONFIG, &check);
+    return ((check >> 1) & 0x01) == bypass;
+}
 
 void setClock(mpu6050_clock_select_t);
 mpu6050_clock_select_t getClock(void);
@@ -158,9 +217,18 @@ bool setTemperatureStandby(bool enable);
 
 void resetRegisters(void){
     write8(MPU6050_PWR_MGMT_1, 1 << 7);
+
+    uint8_t reg = 0;
+    do {
+        delay(1);
+        read8(MPU6050_PWR_MGMT_1, &reg);
+    }while (reg & (1 << 7));
+
+    delay(20);
 }
 void resetSignalPath(void){
     write8(MPU6050_SIGNAL_PATH_RESET, 7);
+    delay(20);
 }
 
 void getAccelRawData(int16_t *x, int16_t *y, int16_t *z){
@@ -229,10 +297,12 @@ void getGyroData(float *x, float *y, float *z){
             gyro_scale = 16.4;
             break;
     }
+    
     //get raw data
     int16_t x_raw, y_raw ,z_raw;
     x_raw = y_raw = z_raw = 0;
     getGyroRawData(&x_raw, &y_raw, &z_raw);
+    
     //scale raw data
     *x = ((float)x_raw) / gyro_scale;
     *y = ((float)y_raw) / gyro_scale;
@@ -255,24 +325,35 @@ bool MPU6050_Init(i2c_master_dev_handle_t *input_mpu6050_dev){
     
     resetRegisters(); //this will put device into sleep mode
     resetSignalPath();
-    
-    write8(MPU6050_PWR_MGMT_1, 0x00); //we have to write to PWR MGMT 1 reg to wake it up from sleep for initialization
 
-    setSampleRateDivisor(0);
+    write8(MPU6050_PWR_MGMT_1, 0x00); //we have to write to PWR MGMT 1 reg to wake it up from sleep after reset
 
-    setFilterBandwidth(MPU6050_BAND_44_HZ);
-    
-    setGyroRange(MPU6050_RANGE_500_DEG);
+    if(!setSampleRateDivisor(0)) 
+        printf("Error: Failed to set Sample Rate Divisor\r\n");
 
-    setAccelerometerRange(MPU6050_RANGE_2_G); // already the default
+    if(!setFilterBandwidth(MPU6050_BAND_44_HZ)) 
+        printf("Error: Failed to set Filter Bandwidth\r\n");
+    
+    if(!setGyroRange(MPU6050_RANGE_500_DEG)) 
+        printf("Error: Failed to set Gyroscope Range\r\n");
 
-    setInterruptPinPolarity(false);
+    if(!setAccelerometerRange(MPU6050_RANGE_2_G)) 
+        printf("Error: Failed to set Accelerometer Range\r\n");
+
+    if(!setInterruptPinPolarity(false)) 
+        printf("Error: Failed to set Interrupt Pin Polarity\r\n");
     
-    setInterruptPinLatch(false);
+    if(!setInterruptPinLatch(false)) 
+        printf("Error: Failed to set Interrupt Pin Latch\r\n");
     
-    setInterruptClear(false);
+    if(!setInterruptClear(false)) 
+        printf("Error: Failed to set Interrupt Clear behavior\r\n");
     
-    setDRDYInterrupt(true);
+    if(!setDRDYInterrupt(false)) 
+        printf("Error: Failed to configure Data Ready Interrupt\r\n");
+
+    if(!setI2CBypass(true)) //IMPORTANT for module such as the GY-87 where Magnetometer are connected to AUX I2C bus of MPU6050
+        printf("Error: Failed to configure I2C Bypass\r\n");
 
     return true;
 }

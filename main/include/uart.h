@@ -1,9 +1,9 @@
-#ifndef GPS_H
-#define GPS_H
+#ifndef _UART_H
+#define _UART_H
 
+#include <common.h>
 #include <NMEA.h>
 #include "driver/uart.h"
-#include <common.h>
 
 #define TX_PIN 17
 #define RX_PIN 16

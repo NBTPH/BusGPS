@@ -10,16 +10,7 @@
 #include "driver/gpio.h"
 #include <uart.h>
 #include <i2c.h>
-#include "esp_timer.h"
 
-int64_t millis(){
-    int64_t result = esp_timer_get_time() / 1000;
-    return result;
-}
-
-void delay(uint32_t ms){
-    vTaskDelay(pdMS_TO_TICKS(ms));
-}
 
 void app_main(void){
     printf("SPI Slave starting...\n");

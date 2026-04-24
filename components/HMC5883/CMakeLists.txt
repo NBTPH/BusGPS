@@ -1,3 +1,3 @@
-idf_component_register(SRCS "MPU6050_U.c"
+idf_component_register(SRCS "HMC5883_U.c"
                     PRIV_REQUIRES esp_driver_i2c
                     INCLUDE_DIRS "." "../../main/include")

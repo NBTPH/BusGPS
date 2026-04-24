@@ -1,10 +1,7 @@
 #ifndef __L76G_H__
 #define __L76G_H__
 
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdint.h>
+#include <common.h>
 #include <stdlib.h>
 
 typedef struct{

@@ -8,9 +8,8 @@
 #ifndef _TinyEKF_H_
 #define _TinyEKF_H_
 
+#include <common.h>
 #include <math.h>
-#include <stdbool.h>
-#include <string.h>
 
 /**
   * Floating-point precision defaults to single but can be made double via
@@ -24,17 +23,17 @@ typedef struct{
     int EKF_M; //number of states
     int EKF_N; //number of observations
 
-    _float_t *x; //State vector
-    _float_t *P; //Prediction error covariance
+    _float_t *x; //State vector [M x 1]
+    _float_t *P; //Prediction error covariance [M x M]
 
-    _float_t *fx; //predicted values
-    _float_t *F; //Jacobian of state-transition function
-    _float_t *Q; //process noise matrix
+    _float_t *fx; //predicted values [M x 1]
+    _float_t *F; //Jacobian of state-transition function [M x M]
+    _float_t *Q; //process noise matrix [M x M]
 
-    _float_t *z; //observations
-    _float_t *hx; //predicted values from prediction step
-    _float_t *H; //sensor-function Jacobian matrix
-    _float_t *R; //measurement-noise matrix 
+    _float_t *z; //observations [N x 1]
+    _float_t *hx; //predicted values from prediction step [M x 1]
+    _float_t *H; //sensor-function Jacobian matrix [N x M]
+    _float_t *R; //measurement-noise matrix [N x N]
 }ekf_t;
 
 #endif

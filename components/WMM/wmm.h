@@ -1,7 +1,7 @@
 #ifndef WMM_H
 #define WMM_H
 
-#include <stdint.h>
+#include <common.h>
 
 #define WMM_EPOCH		2025.0f
 
