@@ -21,61 +21,23 @@
 
 #define MPU6050_I2CADDR_DEFAULT 0x68 ///< MPU6050 default i2c address w/ AD0 low
 
-bool MPU6050_Init(i2c_master_dev_handle_t *input_mpu6050_dev);
+typedef struct{
+    float x;
+    float y;
+    float z;
+}mpu6050_t;
 
-void getAccelerometerData(float *x, float *y, float *z);
+extern bool MPU6050_is_Calibrating;
+
+bool MPU6050_Init(i2c_master_dev_handle_t *input_mpu6050_dev);
+void MPU6050_Calibration(uint32_t samples_num);
+
+void getAccelRawData(int16_t *x, int16_t *y, int16_t *z);
+void getGyroRawData(int16_t *x, int16_t *y, int16_t *z);
+
+void getAccelData(float *x, float *y, float *z);
 void getGyroData(float *x, float *y, float *z);
 
 bool MPU6050_DataReady(void);
-
-// mpu6050_accel_range_t getAccelerometerRange(void);
-// void setAccelerometerRange(mpu6050_accel_range_t);
-
-// mpu6050_gyro_range_t getGyroRange(void);
-// void setGyroRange(mpu6050_gyro_range_t);
-
-// void setInterruptPinPolarity(bool active_low);
-// void setInterruptPinLatch(bool held);
-// void setFsyncSampleOutput(mpu6050_fsync_out_t fsync_output);
-
-// mpu6050_highpass_t getHighPassFilter(void);
-// void setHighPassFilter(mpu6050_highpass_t bandwidth);
-
-// void setMotionInterrupt(bool active);
-// void setMotionDetectionThreshold(uint8_t thr);
-// void setMotionDetectionDuration(uint8_t dur);
-// bool getMotionInterruptStatus(void);
-
-// mpu6050_fsync_out_t getFsyncSampleOutput(void);
-// void setI2CBypass(bool bypass);
-
-// void setClock(mpu6050_clock_select_t);
-// mpu6050_clock_select_t getClock(void);
-
-// void setFilterBandwidth(mpu6050_bandwidth_t bandwidth);
-// mpu6050_bandwidth_t getFilterBandwidth(void);
-
-// void setSampleRateDivisor(uint8_t);
-// uint8_t getSampleRateDivisor(void);
-
-// bool enableSleep(bool enable);
-// bool enableCycle(bool enable);
-
-// void setCycleRate(mpu6050_cycle_rate_t rate);
-// mpu6050_cycle_rate_t getCycleRate(void);
-
-// bool setGyroStandby(bool xAxisStandby, bool yAxisStandby, bool zAxisStandby);
-// bool setAccelerometerStandby(bool xAxisStandby, bool yAxisStandby, bool zAxisStandby);
-// bool setTemperatureStandby(bool enable);
-
-// void reset(void);
-
-// void getTemperatureSensor(void);
-// void getAccelerometerSensor(void);
-// void getGyroSensor(void);
-
-
-// void _getRawSensorData(void);
-// void _scaleSensorData(void);
 
 #endif

@@ -1,3 +1,3 @@
 idf_component_register(SRCS "TinyEKF.c"
-                    PRIV_REQUIRES
+                    PRIV_REQUIRES LinearAlgebra
                     INCLUDE_DIRS "." "../../main/include")

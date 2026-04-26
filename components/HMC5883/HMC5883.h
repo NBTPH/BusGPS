@@ -19,60 +19,14 @@
 
 #define HMC5883_ADDRESS_MAG (0x3C >> 1) // 0011110x
 
+extern bool HMC5883_is_Calibrating;
+
+void HMC5883_Calibration(uint32_t samples_num);
 bool HMC5883_Init(i2c_master_dev_handle_t *input_hmc5883_dev);
 
+void getMagRawData(int16_t *x, int16_t *y, int16_t *z);
 void getMagData(float *x, float *y, float *z);
 
 bool HMC5883_DataReady(void);
-
-// mpu6050_accel_range_t getAccelerometerRange(void);
-// void setAccelerometerRange(mpu6050_accel_range_t);
-
-// mpu6050_gyro_range_t getGyroRange(void);
-// void setGyroRange(mpu6050_gyro_range_t);
-
-// void setInterruptPinPolarity(bool active_low);
-// void setInterruptPinLatch(bool held);
-// void setFsyncSampleOutput(mpu6050_fsync_out_t fsync_output);
-
-// mpu6050_highpass_t getHighPassFilter(void);
-// void setHighPassFilter(mpu6050_highpass_t bandwidth);
-
-// void setMotionInterrupt(bool active);
-// void setMotionDetectionThreshold(uint8_t thr);
-// void setMotionDetectionDuration(uint8_t dur);
-// bool getMotionInterruptStatus(void);
-
-// mpu6050_fsync_out_t getFsyncSampleOutput(void);
-// void setI2CBypass(bool bypass);
-
-// void setClock(mpu6050_clock_select_t);
-// mpu6050_clock_select_t getClock(void);
-
-// void setFilterBandwidth(mpu6050_bandwidth_t bandwidth);
-// mpu6050_bandwidth_t getFilterBandwidth(void);
-
-// void setSampleRateDivisor(uint8_t);
-// uint8_t getSampleRateDivisor(void);
-
-// bool enableSleep(bool enable);
-// bool enableCycle(bool enable);
-
-// void setCycleRate(mpu6050_cycle_rate_t rate);
-// mpu6050_cycle_rate_t getCycleRate(void);
-
-// bool setGyroStandby(bool xAxisStandby, bool yAxisStandby, bool zAxisStandby);
-// bool setAccelerometerStandby(bool xAxisStandby, bool yAxisStandby, bool zAxisStandby);
-// bool setTemperatureStandby(bool enable);
-
-// void reset(void);
-
-// void getTemperatureSensor(void);
-// void getAccelerometerSensor(void);
-// void getGyroSensor(void);
-
-
-// void _getRawSensorData(void);
-// void _scaleSensorData(void);
 
 #endif

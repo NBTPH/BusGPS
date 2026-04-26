@@ -3,23 +3,26 @@
 
 i2c_master_dev_handle_t *hmc5883_dev_p = NULL;
 
+float soft_iron_matrix[3][3] = {0};
+float hard_iron_bias[3] = {0};
+
 static void write8(const uint8_t reg_addr, const uint8_t data){
     uint8_t write_buff[2] = {reg_addr, data};
-    ESP_ERROR_CHECK(i2c_master_transmit(*hmc5883_dev_p, write_buff, 2, 250));
+    ESP_ERROR_CHECK(i2c_master_transmit(*hmc5883_dev_p, write_buff, 2, I2C_TIMEOUT_MS));
 }
 static void read8(const uint8_t reg_addr, uint8_t *data){
-    ESP_ERROR_CHECK(i2c_master_transmit_receive(*hmc5883_dev_p, &reg_addr, 1, data, 1, 250));
+    ESP_ERROR_CHECK(i2c_master_transmit_receive(*hmc5883_dev_p, &reg_addr, 1, data, 1, I2C_TIMEOUT_MS));
 }
 
 static void write_bytes(const uint8_t reg_addr, const uint8_t *data, size_t length){
     uint8_t *write_buff = malloc(sizeof(uint8_t) * (length + 1));
     write_buff[0] = reg_addr;
     memcpy(&write_buff[1], data, length);
-    ESP_ERROR_CHECK(i2c_master_transmit(*hmc5883_dev_p, write_buff, length + 1, 250));
+    ESP_ERROR_CHECK(i2c_master_transmit(*hmc5883_dev_p, write_buff, length + 1, I2C_TIMEOUT_MS));
     free(write_buff);
 }
 static void read_bytes(const uint8_t reg_addr, uint8_t *data, size_t length){
-    ESP_ERROR_CHECK(i2c_master_transmit_receive(*hmc5883_dev_p, &reg_addr, 1, data, length, 250));
+    ESP_ERROR_CHECK(i2c_master_transmit_receive(*hmc5883_dev_p, &reg_addr, 1, data, length, I2C_TIMEOUT_MS));
 }
 
 hmc5883SamplesAverage_t getSamplesAverage(void){
@@ -138,7 +141,8 @@ void enableMag(void){
 bool HMC5883_DataReady(void){
     uint8_t reg = 0;
     read8(HMC5883_REGISTER_MAG_SR_REG_M, &reg);
-    return (reg & 0x01);
+    reg &= 0x01;
+    return reg;
 }
 
 void getMagData(float *x, float *y, float *z){
@@ -182,6 +186,103 @@ void getMagData(float *x, float *y, float *z){
     *x = ((float)x_raw) / _hmc5883_Gauss_LSB_XYZ;
     *y = ((float)y_raw) / _hmc5883_Gauss_LSB_XYZ;
     *z = ((float)z_raw) / _hmc5883_Gauss_LSB_XYZ;
+}
+
+bool HMC5883_is_Calibrating = false;
+void HMC5883_Calibration(uint32_t samples_num){
+    if(!HMC5883_is_Calibrating){
+        HMC5883_is_Calibrating = true;
+
+        float scatter_matrix[10][10]; //Declare the pointer with the internal dimension (10 one sample entry)
+        memset(scatter_matrix, 0, sizeof(scatter_matrix)); //initalize all the maxtrix
+        for(uint32_t i = 0; i < samples_num; i++){
+            while(!HMC5883_DataReady()); //wait until data ready
+            float x = 0, y = 0, z = 0;
+            getMagData(&x, &y, &z);
+
+            //vi = x^2, y^2, z^2, xy, yz, xz, x, y, z, 1
+            float entry[10];
+            entry[i][0] = x * x;
+            entry[i][1] = y * y;
+            entry[i][2] = z * z;
+
+            entry[i][3] = x * y;
+            entry[i][4] = y * z;
+            entry[i][5] = x * z;
+
+            entry[i][6] = x;
+            entry[i][7] = y;
+            entry[i][8] = z;
+
+            entry[i][9] = 1;
+
+            //Only calculate the upper triangle and mirror it later
+            for (int i = 0; i < 10; i++) {
+                for (int j = i; j < 10; j++) {
+                    scatter_matrix[i][j] += entry[i] * entry[j];
+                }
+            }
+
+            delay(50);
+        }
+
+        //mirror the lower triangle
+        for(int i = 0; i < 10; i++){
+            for(int j = 0; j < i; j++){
+                scatter_matrix[i][j] = scatter_matrix[j][i];
+            }
+        }
+
+        float eigenvalues[10] = {0};
+        float eigenvector[10][10] = {0};
+        if(!jacobi_eigensystem(scatter_matrix, eigenvalues, eigenvector, 10)){
+            return;
+        }
+
+        float smallest_nonneg_eigenvalue = -1;
+        uint8_t smallest_nonneg_eigenvalue_idx = -1;
+
+        for(uint8_t i = 1; i < 10; i++){
+            if(smallest_nonneg_eigenvalue < 0 && eigenvalues[i] >= 0){ //get the first non neg eigen value
+                smallest_nonneg_eigenvalue = eigenvalues[i];
+                smallest_nonneg_eigenvalue_idx = i;
+            }
+            else if(smallest_nonneg_eigenvalue >= 0 && smallest_nonneg_eigenvalue_idx >= 0){
+                if(eigenvalues[i] < smallest_nonneg_eigenvalue && eigenvalues[i] >= 0){
+                    smallest_nonneg_eigenvalue = eigenvalues[i];
+                    smallest_nonneg_eigenvalue_idx = i;
+                }
+            }
+        }
+
+        //Only copy the upper triangle and mirror it later
+        float symmetric_matrix[3][3] = {0};
+        symmetric_matrix[0][0] = eigenvector[smallest_nonneg_eigenvalue_idx][0]; 
+        symmetric_matrix[0][1] = eigenvector[smallest_nonneg_eigenvalue_idx][3] / 2.f;
+        symmetric_matrix[0][2] = eigenvector[smallest_nonneg_eigenvalue_idx][4] / 2.f;
+        symmetric_matrix[1][1] = eigenvector[smallest_nonneg_eigenvalue_idx][1];
+        symmetric_matrix[1][2] = eigenvector[smallest_nonneg_eigenvalue_idx][5] / 2.f;
+        symmetric_matrix[2][2] = eigenvector[smallest_nonneg_eigenvalue_idx][2];
+
+        //mirror the lower triangle
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < i; j++){
+                symmetric_matrix[i][j] = symmetric_matrix[j][i];
+            }
+        }
+
+        float inverse_symmetric_matrix[3][3] = {0};
+        invert(symmetric_matrix, inverse_symmetric_matrix, 3);
+
+        float temp_hard_iron_bias[3] = {0};
+        _mulvec(inverse_symmetric_matrix, &eigenvector[smallest_nonneg_eigenvalue_idx][6], temp_hard_iron_bias, 3, 3);
+
+        for(uint8_t i = 0; i < 3; i++){
+            hard_iron_bias[i] = temp_hard_iron_bias[i] * -(0.5); //why is some paper just multiply with -1 while some multiply with -1/2
+        }
+
+        
+    }
 }
 
 bool HMC5883_Init(i2c_master_dev_handle_t *input_hmc5883_dev){

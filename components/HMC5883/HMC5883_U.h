@@ -3,6 +3,7 @@
 
 #include <common.h>
 #include <stdlib.h>
+#include <LinearAlgebra.h>
 #include "driver/i2c_master.h"
 #include "esp_check.h"
 

@@ -10,7 +10,10 @@
 #include <string.h>
 #include <stdbool.h>
 
+#define I2C_TIMEOUT_MS 20 
+
 int64_t millis();
+int64_t micros();
 void delay(uint32_t ms);
 
 #endif

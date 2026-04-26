@@ -1,6 +1,9 @@
 #include <i2c.h>
 #include <math.h>
 
+QueueHandle_t MPU6050_Queue = NULL;
+QueueHandle_t HMC5883_Queue = NULL;
+
 i2c_master_dev_handle_t mpu6050_i2c_dev = {0};
 i2c_master_dev_handle_t hmc5883_i2c_dev = {0};
 
@@ -18,7 +21,7 @@ static void i2c_master_init(i2c_master_bus_handle_t *bus_handle, i2c_master_dev_
     i2c_device_config_t dev_config = {
         .dev_addr_length = I2C_ADDR_BIT_LEN_7,
         .device_address = MPU6050_I2CADDR_DEFAULT,
-        .scl_speed_hz = 400000, //max frequency for MPU6050
+        .scl_speed_hz = 400000, //max frequency for MPU6050 and HMC5883L
     };
     ESP_ERROR_CHECK(i2c_master_bus_add_device(*bus_handle, &dev_config, i2c_mpu6050_dev_handle));
 
@@ -28,6 +31,9 @@ static void i2c_master_init(i2c_master_bus_handle_t *bus_handle, i2c_master_dev_
 }
 
 void TaskI2C(void *pvParameters){
+    MPU6050_Queue = xQueueCreate(MPU6050_QUEUE_LENGTH, sizeof(MPU6050_Sensor_t));
+    HMC5883_Queue = xQueueCreate(HMC5883_QUEUE_LENGTH, sizeof(HMC5883_Sensor_t));
+
     i2c_master_bus_handle_t bus_handle;
     i2c_master_init(&bus_handle, &mpu6050_i2c_dev, &hmc5883_i2c_dev);
     printf("I2C initialized successfully\n");
@@ -47,59 +53,80 @@ void TaskI2C(void *pvParameters){
     else{
         printf("HMC5883 initialized successfully\n");
     }
-
-    float x, y, z;
-    x = y = z = 0;
+    
+    MPU6050_Sensor_t mpu6050_data = {0};
+    HMC5883_Sensor_t hmc5883_data = {0};
+    // int64_t last_read_micros = micros();
+    int64_t last_print_micros = micros();
 
     while(1){
-        if(MPU6050_DataReady()){
-            int64_t start = millis();
-            getAccelerometerData(&x, &y, &z);
-            int64_t interval = millis() - start;
-            // printf("ACCEL X: %5f Y: %5f Z: %5f\r\n", x, y, z);
-            // printf("Time taken %lld ms\r\n", interval);
-            start = millis();
-            getGyroData(&x, &y, &z);
-            interval = millis() - start;
-            // printf("GYRO X: %5f Y: %5f Z: %5f\r\n", x, y, z);
-            // printf("Time taken %lld ms\r\n\n\n", interval);
+        int64_t current_micros = micros();
+        if(!MPU6050_is_Calibrating){
+            if(MPU6050_DataReady()){
+                mpu6050_data.Timestamp = current_micros;
+
+                float x, y, z;
+                x = y = z = 0;
+                
+                getAccelData(&x, 
+                            &y, 
+                            &mpu6050_data.Accel.z);
+
+                //remap to match with aviation standards, where X is North, Y is East (keep Z points up)
+                mpu6050_data.Accel.x = -y;
+                mpu6050_data.Accel.y = -x;
+
+                getGyroData(&x, 
+                            &y, 
+                            &z);
+
+                //same thing
+                mpu6050_data.Gyro.x = -y;
+                mpu6050_data.Gyro.y = -x;
+                mpu6050_data.Gyro.z = -z;                        
+
+                if(xQueueSend(MPU6050_Queue, (void *)&mpu6050_data, 2) == errQUEUE_FULL){
+                    printf("MPU6050 QUEUE FULL\r\n");
+                }
+            }
+            else{
+                // printf("MPU6050 DATA NOT READY\r\n");
+            }
+
+            if(HMC5883_DataReady()){
+                float x, y;
+                x = y = 0;
+                
+                getAccelData(&x, 
+                            &y, 
+                            &hmc5883_data.z);
+
+                //same thing
+                hmc5883_data.x = -y;
+                hmc5883_data.y = -x;
+
+                if(xQueueSend(HMC5883_Queue, (void *)&hmc5883_data, 2) == errQUEUE_FULL){
+                    printf("HMC5883 QUEUE FULL\r\n");
+                }
+            }
+            else{
+                // printf("HMC5883 DATA NOT READY\r\n");
+            }
         }
-        else{
-            printf("DATA NOT READY\r\n");
-        }
 
-        if(HMC5883_DataReady()){
-            int64_t start = millis();
-            float x_temp, y_temp, z_temp;
-            x_temp = y_temp = z_temp = 0;
-            getMagData(&x_temp, &y_temp, &z_temp);
-            int64_t interval = millis() - start;
-            // printf("Mag X: %5f Y: %5f Z: %5f\r\n", x_temp, y_temp, z_temp);
-            // printf("Time taken %lld ms\r\n\n\n", interval);
-            // start = millis();
-            // getGyroData(&x, &y, &z);
-            // interval = millis() - start;
-            // printf("GYRO X: %5f Y: %5f Z: %5f\r\n", x, y, z);
-            // printf("Time taken %lld ms\r\n\n\n", interval);
-            printf("MAG X: %5f Y: %5f Z: %5f\r\n", x_temp, y_temp, z_temp);
+        // x = -y_temp;
+        // y = x_temp;
+        // z = z_temp;
 
-            x = -y_temp;
-            y = x_temp;
-            z = z_temp;
+        // float headingRad = atan2(y, x); //calculate heading, the output is the angle value in radiant of North relative to X axis
+        // float headingDeg = (headingRad * 180) / M_PI;
+        // float declinationAngle = -0.64166666666667; //declination angle in HCMC as of April 2026
 
-            float headingRad = atan2(y, x); //calculate heading, the output is the angle value in radiant of North relative to X axis
-            float headingDeg = (headingRad * 180) / M_PI;
-            float declinationAngle = -0.64166666666667; //declination angle in HCMC as of April 2026
+        // headingDeg += declinationAngle;
 
-            headingDeg += declinationAngle;
+        // if (headingDeg < 0)    headingDeg += 360;
 
-            if (headingDeg < 0)    headingDeg += 360;
-
-            printf("HEADING DEGREE: %5f\r\n\n\n", headingDeg);
-        }
-        else{
-            printf("DATA NOT READY\r\n");
-        }
+        // printf("HEADING DEGREE: %5f\r\n\n\n", headingDeg);
 
         // int64_t start = millis();
         // getAccelerometerData(&x, &y, &z);
@@ -129,6 +156,5 @@ void TaskI2C(void *pvParameters){
 
         //     printf("HEADING DEGREE: %5f\r\n\n\n", headingDeg);
         // }
-        delay(100);
     }
 }
