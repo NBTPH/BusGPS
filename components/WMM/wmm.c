@@ -1,10 +1,7 @@
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
 #include <math.h>
 #include "wmm.h"
 
-#define PI_CONST 3.14159265359f
+#define PI_CONST M_PI
 #define RADIANS_TO_DEGREES 0.017453292f
 #define DEGREES_TO_RADIANS (PI_CONST / 180.0f)
 #define A_CONST 6378.137f

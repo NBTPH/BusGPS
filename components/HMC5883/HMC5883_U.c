@@ -183,38 +183,56 @@ void getMagData(float *x, float *y, float *z){
     x_raw = y_raw = z_raw = 0;
     getMagRawData(&x_raw, &y_raw, &z_raw);
     //scale raw data
-    *x = ((float)x_raw) / _hmc5883_Gauss_LSB_XYZ;
-    *y = ((float)y_raw) / _hmc5883_Gauss_LSB_XYZ;
-    *z = ((float)z_raw) / _hmc5883_Gauss_LSB_XYZ;
+    float bias_corrected[3] = {0};
+    bias_corrected[0] = (((float)x_raw) / _hmc5883_Gauss_LSB_XYZ) - hard_iron_bias[0];
+    bias_corrected[1] = (((float)y_raw) / _hmc5883_Gauss_LSB_XYZ) - hard_iron_bias[1];
+    bias_corrected[2] = (((float)z_raw) / _hmc5883_Gauss_LSB_XYZ) - hard_iron_bias[2];
+
+    float calibrated_data[3] = {0};
+    _mulvec((float*)soft_iron_matrix, bias_corrected, calibrated_data, 3, 3);
+    
+    *x = calibrated_data[0];
+    *y = calibrated_data[1];
+    *z = calibrated_data[2];
 }
 
 bool HMC5883_is_Calibrating = false;
 void HMC5883_Calibration(uint32_t samples_num){
-    if(!HMC5883_is_Calibrating){
-        HMC5883_is_Calibrating = true;
+    if(HMC5883_is_Calibrating){
+        return;
+    }
+    HMC5883_is_Calibrating = true;
+    delay(5);
+    printf("=========== HMC5883 Calibrations begin ===========\r\n");
 
-        float scatter_matrix[10][10]; //Declare the pointer with the internal dimension (10 one sample entry)
-        memset(scatter_matrix, 0, sizeof(scatter_matrix)); //initalize all the maxtrix
-        for(uint32_t i = 0; i < samples_num; i++){
-            while(!HMC5883_DataReady()); //wait until data ready
-            float x = 0, y = 0, z = 0;
-            getMagData(&x, &y, &z);
+    float scatter_matrix[10][10]; //Declare the pointer with the internal dimension (10 one sample entry)
+    float previous_sample[3] = {0, 0, 1};
+    memset((float*)scatter_matrix, 0, sizeof(scatter_matrix)); //initalize all the maxtrix
+    uint32_t num = 0;
+    while(num < samples_num){
+        while(!HMC5883_DataReady()); //wait until data ready
+        float data_read[3];
+        getMagData(&data_read[0], &data_read[1], &data_read[2]); //
+        
+        float angle = 0;
+        angle_between(data_read, previous_sample, &angle, 3);
+        if(angle > 10){//take in new data only when new data vector is more than 10 degree from previous data vector
 
             //vi = x^2, y^2, z^2, xy, yz, xz, x, y, z, 1
             float entry[10];
-            entry[i][0] = x * x;
-            entry[i][1] = y * y;
-            entry[i][2] = z * z;
+            entry[0] = data_read[0] * data_read[0];
+            entry[1] = data_read[1] * data_read[1];
+            entry[2] = data_read[2] * data_read[2];
 
-            entry[i][3] = x * y;
-            entry[i][4] = y * z;
-            entry[i][5] = x * z;
+            entry[3] = data_read[0] * data_read[1];
+            entry[4] = data_read[1] * data_read[2];
+            entry[5] = data_read[0] * data_read[2];
 
-            entry[i][6] = x;
-            entry[i][7] = y;
-            entry[i][8] = z;
+            entry[6] = data_read[0];
+            entry[7] = data_read[1];
+            entry[8] = data_read[2];
 
-            entry[i][9] = 1;
+            entry[9] = 1;
 
             //Only calculate the upper triangle and mirror it later
             for (int i = 0; i < 10; i++) {
@@ -222,70 +240,174 @@ void HMC5883_Calibration(uint32_t samples_num){
                     scatter_matrix[i][j] += entry[i] * entry[j];
                 }
             }
-
-            delay(50);
-        }
-
-        //mirror the lower triangle
-        for(int i = 0; i < 10; i++){
-            for(int j = 0; j < i; j++){
-                scatter_matrix[i][j] = scatter_matrix[j][i];
+            
+            memcpy(previous_sample, data_read, sizeof(previous_sample));
+            if(((num + 1) % 5) == 0){
+                printf("Sample %lu/%lu: x=%.4f y=%.4f z=%.4f\r\n", (unsigned long)num + 1, (unsigned long)samples_num, data_read[0], data_read[1], data_read[2]);
             }
+            num++;
         }
+        delay(10);
+    }
 
-        float eigenvalues[10] = {0};
-        float eigenvector[10][10] = {0};
-        if(!jacobi_eigensystem(scatter_matrix, eigenvalues, eigenvector, 10)){
-            return;
+    //mirror the lower triangle
+    for(int i = 0; i < 10; i++){
+        for(int j = 0; j < i; j++){
+            scatter_matrix[i][j] = scatter_matrix[j][i];
         }
+    }
 
-        float smallest_nonneg_eigenvalue = -1;
-        uint8_t smallest_nonneg_eigenvalue_idx = -1;
+    debug_printf("Scatter matrix:\n");
+    print_matrix((float*)scatter_matrix, 10, 10);
 
-        for(uint8_t i = 1; i < 10; i++){
-            if(smallest_nonneg_eigenvalue < 0 && eigenvalues[i] >= 0){ //get the first non neg eigen value
+    debug_printf("Running Jacobi eigensystem...\n");
+    float eigenvalues[10] = {0};
+    float eigenvectors[10][10] = {0};
+    if(!jacobi_eigensystem((float*)scatter_matrix, eigenvalues, (float*)eigenvectors, 10)){
+        return;
+    }
+
+    debug_printf("Eigenvalues: ");
+    print_vector(eigenvalues, 10);
+    debug_printf("Eigenvectors:\n");
+    print_matrix((float*)eigenvectors, 10, 10);
+
+    float smallest_nonneg_eigenvalue = -1;
+    int8_t smallest_idx = -1;
+
+    for(uint8_t i = 0; i < 10; i++){
+        if(smallest_nonneg_eigenvalue < 0 && eigenvalues[i] >= 0){ //get the first non neg eigen value
+            smallest_nonneg_eigenvalue = eigenvalues[i];
+            smallest_idx = i;
+        }
+        else if(smallest_nonneg_eigenvalue >= 0 && smallest_idx >= 0){ //if found the first nonneg eigen value, find the smallest nonneg eigenvalue
+            if(eigenvalues[i] < smallest_nonneg_eigenvalue && eigenvalues[i] >= 0){
                 smallest_nonneg_eigenvalue = eigenvalues[i];
-                smallest_nonneg_eigenvalue_idx = i;
-            }
-            else if(smallest_nonneg_eigenvalue >= 0 && smallest_nonneg_eigenvalue_idx >= 0){
-                if(eigenvalues[i] < smallest_nonneg_eigenvalue && eigenvalues[i] >= 0){
-                    smallest_nonneg_eigenvalue = eigenvalues[i];
-                    smallest_nonneg_eigenvalue_idx = i;
-                }
+                smallest_idx = i;
             }
         }
+    }
 
-        //Only copy the upper triangle and mirror it later
-        float symmetric_matrix[3][3] = {0};
-        symmetric_matrix[0][0] = eigenvector[smallest_nonneg_eigenvalue_idx][0]; 
-        symmetric_matrix[0][1] = eigenvector[smallest_nonneg_eigenvalue_idx][3] / 2.f;
-        symmetric_matrix[0][2] = eigenvector[smallest_nonneg_eigenvalue_idx][4] / 2.f;
-        symmetric_matrix[1][1] = eigenvector[smallest_nonneg_eigenvalue_idx][1];
-        symmetric_matrix[1][2] = eigenvector[smallest_nonneg_eigenvalue_idx][5] / 2.f;
-        symmetric_matrix[2][2] = eigenvector[smallest_nonneg_eigenvalue_idx][2];
+    debug_printf("Smallest non-negative eigenvalue: %10.6f at index %d\n", smallest_nonneg_eigenvalue, smallest_idx);
+    debug_printf("Corresponding eigenvector: ");
+    print_vector(&eigenvectors[smallest_idx][0], 10);
 
-        //mirror the lower triangle
-        for(int i = 0; i < 3; i++){
-            for(int j = 0; j < i; j++){
-                symmetric_matrix[i][j] = symmetric_matrix[j][i];
-            }
+    //The eigenvector corresponds to the smallest eigenvalue is the 
+    //Only copy the upper triangle and mirror it later
+    float symmetric_matrix[3][3] = {0};
+    symmetric_matrix[0][0] = eigenvectors[smallest_idx][0]; 
+    symmetric_matrix[0][1] = eigenvectors[smallest_idx][3] / 2.f;
+    symmetric_matrix[0][2] = eigenvectors[smallest_idx][5] / 2.f;
+    symmetric_matrix[1][1] = eigenvectors[smallest_idx][1];
+    symmetric_matrix[1][2] = eigenvectors[smallest_idx][4] / 2.f;
+    symmetric_matrix[2][2] = eigenvectors[smallest_idx][2];
+
+    //mirror the lower triangle
+    for(int i = 0; i < 3; i++){
+        for(int j = 0; j < i; j++){
+            symmetric_matrix[i][j] = symmetric_matrix[j][i];
         }
+    }
 
+    debug_printf("Symmetric matrix M:\n");
+    print_matrix((float*)symmetric_matrix, 3, 3);
+
+    //calculate the hard iron bias vector b = (-1/2) * symmetric_matrix^-1 * [a7, a8, a9] (put this in a code block so we don't waist too much stack memory
+    {
         float inverse_symmetric_matrix[3][3] = {0};
-        invert(symmetric_matrix, inverse_symmetric_matrix, 3);
+        invert((float*)symmetric_matrix, (float*)inverse_symmetric_matrix, 3);
+
+        debug_printf("Invert of M:\n");
+        print_matrix((float*)inverse_symmetric_matrix, 3, 3);
 
         float temp_hard_iron_bias[3] = {0};
-        _mulvec(inverse_symmetric_matrix, &eigenvector[smallest_nonneg_eigenvalue_idx][6], temp_hard_iron_bias, 3, 3);
+        _mulvec((float*)inverse_symmetric_matrix, &eigenvectors[smallest_idx][6], temp_hard_iron_bias, 3, 3);
 
         for(uint8_t i = 0; i < 3; i++){
             hard_iron_bias[i] = temp_hard_iron_bias[i] * -(0.5); //why is some paper just multiply with -1 while some multiply with -1/2
         }
 
-        
+        debug_printf("Hard iron bias (Gauss): x=%.6f y=%.6f z=%.6f\n", hard_iron_bias[0], hard_iron_bias[1], hard_iron_bias[2]);
     }
+
+
+    //calculate the scaling factor k = R^2 / (b^TMb) - a10
+    float k = 0;
+    {
+        float R = 41841.5f / 100000.0f; //the total magnetic intensity is in nano tesla and magnetometer output gauss so we convert to gauss
+        float Mb[3] = {0};
+        _mulvec((float*)symmetric_matrix, hard_iron_bias, Mb, 3, 3);
+
+        float bTMb = 0;
+        for(uint8_t i = 0; i < 3; i++){
+            bTMb += Mb[i] * hard_iron_bias[i];
+        }
+
+        k = (R * R) / (bTMb - eigenvectors[smallest_idx][9]);
+
+        debug_printf("R=%.6f Gauss, bTMb=%.6f, a10=%.6f\n", R, bTMb, eigenvectors[smallest_idx][9]);
+        debug_printf("Scaling factor k=%.6f\n", k);
+
+        if(k <= 0){ //invalid scaling factor
+            memset(hard_iron_bias, 0, sizeof(hard_iron_bias));
+            return;
+        }
+    }
+
+    float scaled_symmetric_matrix[3][3] = {0};
+    for(uint8_t i = 0; i < 3; i++){
+        for(uint8_t j = 0; j < 3; j++){
+            scaled_symmetric_matrix[i][j] = symmetric_matrix[i][j] * k;
+        }
+    }
+
+    debug_printf("Scaled symmetric matrix M:\n");
+    print_matrix((float*)scaled_symmetric_matrix, 3, 3);
+
+    float s_eigenvalues[3] = {0};
+    float s_eigenvectors[3][3] = {0};
+    if(!jacobi_eigensystem((float*)scaled_symmetric_matrix, s_eigenvalues, (float*)s_eigenvectors, 3)){
+        return;
+    }
+
+    debug_printf("Scaled eigenvalues: ");
+    print_vector((float*)s_eigenvalues, 3);
+
+    
+    debug_printf("Scaled eigenvectors:\n");
+    print_matrix((float*)s_eigenvectors, 3, 3);
+
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            soft_iron_matrix[i][j] = 0;
+            for (int m = 0; m < 3; m++) {
+                // V_{i,m} is M_eigenvectors[m*3 + i]
+                // sqrt(D_{m}) is sqrt(M_eigenvalues[m])
+                // V^T_{m,j} is M_eigenvectors[m*3 + j]
+                soft_iron_matrix[i][j] += s_eigenvectors[m][i] * sqrtf(fabsf(s_eigenvalues[m])) * s_eigenvectors[m][j]; //C^-1 = V^T sqrt(D) V
+            }
+        }
+    }
+
+    debug_printf("Soft iron matrix W:\n");
+    print_matrix((float*)soft_iron_matrix, 3, 3);
+
+    HMC5883_is_Calibrating = false;
+    printf("=========== HMC5883 Calibrations Complete ===========\r\n\n");
+    printf("Hard iron bias (Gauss): x=%.6f y=%.6f z=%.6f\n\n", hard_iron_bias[0], hard_iron_bias[1], hard_iron_bias[2]);
+    printf("Soft iron matrix W:\n");
+    for(int i = 0; i < 3; i++){
+        printf("[ ");
+        for(int j = 0; j < 3; j++) printf("%10.6f ", soft_iron_matrix[i][j]);
+        printf("]\n");
+    }
+    printf("\n");
 }
 
 bool HMC5883_Init(i2c_master_dev_handle_t *input_hmc5883_dev){
+    _addeye((float*)soft_iron_matrix, 3); //initalize soft_iron_matrix as identity matrix
+
     if(input_hmc5883_dev == NULL){
         printf("Error: MPU6050 I2C dev handler not provided\r\n");
         return false;

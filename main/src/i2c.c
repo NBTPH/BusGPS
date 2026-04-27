@@ -61,7 +61,7 @@ void TaskI2C(void *pvParameters){
 
     while(1){
         int64_t current_micros = micros();
-        if(!MPU6050_is_Calibrating){
+        if(!MPU6050_is_Calibrating && !HMC5883_is_Calibrating){
             if(MPU6050_DataReady()){
                 mpu6050_data.Timestamp = current_micros;
 
@@ -97,7 +97,7 @@ void TaskI2C(void *pvParameters){
                 float x, y;
                 x = y = 0;
                 
-                getAccelData(&x, 
+                getMagData(&x, 
                             &y, 
                             &hmc5883_data.z);
 
@@ -112,6 +112,9 @@ void TaskI2C(void *pvParameters){
             else{
                 // printf("HMC5883 DATA NOT READY\r\n");
             }
+        }
+        else{
+            delay(100);
         }
 
         // x = -y_temp;

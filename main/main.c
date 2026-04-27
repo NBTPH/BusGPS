@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <math.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
@@ -23,6 +24,7 @@ void app_main(void){
     MPU6050_Sensor_t MPU6050_Data = {0};
     int64_t MPU6050_Data_Interval = 0;
     HMC5883_Sensor_t HMC5883_Data = {0};
+    float Heading = 0;
 
     // xTaskCreate(TaskUART, "TaskUART/GPS read", 4096, NULL, 2, NULL);
     xTaskCreate(TaskI2C, "IMU/Mag read task", 4096, NULL, 3, NULL); //4KB stack
@@ -42,16 +44,6 @@ void app_main(void){
     while(1){
         int64_t current_millis = millis();
         uint8_t msg_button = 5;
-        // QueueSetMemberHandle_t xActivatedQueue = xQueueSelectFromSet(SensorQueues_set, 1);
-        // if(xActivatedQueue == MPU6050_Queue){
-        //     MPU6050_Sensor_t MPU6050_Data_Temp = {0};
-        //     xQueueReceive(MPU6050_Queue, (void *)&MPU6050_Data_Temp, 0);
-        //     MPU6050_Data_Interval = MPU6050_Data_Temp.Timestamp - MPU6050_Data.Timestamp;
-        //     MPU6050_Data = MPU6050_Data_Temp;
-        // }
-        // else if(xActivatedQueue == HMC5883_Queue){
-        //     xQueueReceive(HMC5883_Queue, (void *)&HMC5883_Data, 0);
-        // }
 
         MPU6050_Sensor_t MPU6050_Data_Temp = {0};
         if(xQueueReceive(MPU6050_Queue, (void *)&MPU6050_Data_Temp, 1) == pdTRUE){
@@ -59,7 +51,13 @@ void app_main(void){
             MPU6050_Data = MPU6050_Data_Temp;
         }
         if(xQueueReceive(HMC5883_Queue, (void *)&HMC5883_Data, 1) == pdTRUE){
-            //do something
+            float headingRad = atan2(-HMC5883_Data.y, HMC5883_Data.x); //calculate heading, the output is the angle value in radiant of North relative to X axis
+            Heading = (headingRad * 180) / M_PI;
+            float declinationAngle = -0.64166666666667; //declination angle in HCMC as of April 2026
+
+            Heading += declinationAngle;
+
+            if (Heading < 0)    Heading += 360;
         }
         if(xQueueReceive(Button_Queue, (void *)&msg_button, 0) == pdTRUE){
             switch (msg_button){
@@ -67,7 +65,7 @@ void app_main(void){
                     MPU6050_Calibration(5000);
                     break;
                 case 1:
-                    HMC5883_Calibration();
+                    HMC5883_Calibration(200);
                     break;
                 default:
                     break;
@@ -79,7 +77,8 @@ void app_main(void){
             printf("ACCEL X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Accel.x, MPU6050_Data.Accel.y, MPU6050_Data.Accel.z);
             printf("GYRO X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Gyro.x, MPU6050_Data.Gyro.y, MPU6050_Data.Gyro.z);
             printf("INTERVAL: %lld us\r\n", MPU6050_Data_Interval);
-            printf("MAG X: %5f Y: %5f Z: %5f\r\n\n\n", HMC5883_Data.x, HMC5883_Data.y, HMC5883_Data.z);
+            printf("MAG X: %5f Y: %5f Z: %5f\r\n", HMC5883_Data.x, HMC5883_Data.y, HMC5883_Data.z);
+            printf("HEADING: %10.6f degree\r\n\n\n", Heading);
         }
 
         if(current_millis - last_blink >= 1000){

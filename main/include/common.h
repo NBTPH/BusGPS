@@ -10,10 +10,12 @@
 #include <string.h>
 #include <stdbool.h>
 
+#define DEBUG_PRINT 1
 #define I2C_TIMEOUT_MS 20 
 
 int64_t millis();
 int64_t micros();
 void delay(uint32_t ms);
+int debug_printf(const char *fmt,...);
 
 #endif

@@ -187,7 +187,7 @@ bool invert(const float * a, float * ainv, const int n)
 
 /// @brief Finds the smallest eigenvalue of a symmetric matrix using the Jacobi method.
 bool jacobi_eigensystem(float *input_matrix, float *eigenvalues, float *eigenvectors, const int n){
-    if(n <= 0 || input_matrix == NULL || eigenvalues == NULL || eigenvectors == 0){
+    if(n <= 0 || input_matrix == NULL || eigenvalues == NULL || eigenvectors == NULL){
         return false;
     }
     
@@ -206,6 +206,7 @@ bool jacobi_eigensystem(float *input_matrix, float *eigenvalues, float *eigenvec
 
     if (n == 1) {
         eigenvalues[0] = A[0];
+        free(A);
         return true;
     }
 
@@ -213,7 +214,7 @@ bool jacobi_eigensystem(float *input_matrix, float *eigenvalues, float *eigenvec
     const float EPSILON = 1e-6f; 
 
     for (int iter = 0; iter < MAX_ITERATIONS; ++iter) {
-        // 1. Find the largest off-diagonal element in A
+        // Find the largest off-diagonal element in A
         int p = 0, q = 1;
         float max_val = 0.0f;
         
@@ -228,12 +229,12 @@ bool jacobi_eigensystem(float *input_matrix, float *eigenvalues, float *eigenvec
             }
         }
 
-        // 2. Check for convergence
+        // Check for convergence
         if (max_val < EPSILON) {
             break; 
         }
 
-        // 3. Compute the Givens rotation parameters (c = cos, s = sin)
+        // Compute the Givens rotation parameters (c = cos, s = sin)
         float diff = A[q * n + q] - A[p * n + p];
         float c, s, t;
 
@@ -251,7 +252,7 @@ bool jacobi_eigensystem(float *input_matrix, float *eigenvalues, float *eigenvec
             s = t * c;
         }
 
-        // 4. Update the matrix A (A = G^T * A * G)
+        // Update the matrix A (A = G^T * A * G)
         float App = A[p * n + p];
         float Aqq = A[q * n + q];
         float Apq = A[p * n + q];
@@ -274,7 +275,7 @@ bool jacobi_eigensystem(float *input_matrix, float *eigenvalues, float *eigenvec
             }
         }
 
-        // 5. Update the eigenvectors matrix
+        // Update the eigenvectors matrix
         // By applying the rotation to the rows 'p' and 'q', we naturally 
         // accumulate the eigenvectors such that row 'i' corresponds to eigenvalue 'i'.
         for (int j = 0; j < n; ++j) {
@@ -286,10 +287,51 @@ bool jacobi_eigensystem(float *input_matrix, float *eigenvalues, float *eigenvec
         }
     }
 
-    // 6. Extract the eigenvalues from the diagonal of the converged matrix A
+    //Extract the eigenvalues from the diagonal of the converged matrix A
     for (int i = 0; i < n; ++i) {
         eigenvalues[i] = A[i * n + i];
     }
-
+    free(A);
     return true;
+}
+
+bool angle_between(const float * a, const float * b, float * c, const int n){
+    if(n <= 0 || a == NULL || b == NULL || c == NULL){
+        return false;
+    }
+
+    float dot_product = 0;
+    for(int i = 0; i < n; i++){
+        dot_product += a[i] * b[i];
+    }
+
+    float a_mag = 0, b_mag = 0;
+    for(int i = 0; i < n; i++){
+        a_mag += a[i] * a[i];
+        b_mag += b[i] * b[i];
+    }
+    a_mag = sqrtf(a_mag);
+    b_mag = sqrtf(b_mag);
+
+    *c = acosf(dot_product / (a_mag * b_mag)) * (180.0f / M_PI); //return in degree
+    return true;
+}
+
+int print_matrix(const float *a, const int m, const int n){
+    int result = 0;
+    for(int i = 0; i < m; i++){
+        result = debug_printf("[");
+        for(int j = 0; j < n; j++){
+            result = debug_printf("%10.6f ", a[i * n + j]);
+        }
+        result = debug_printf("]\n");
+    }
+    return result;
+}
+
+int print_vector(const float * a, const int n){
+    for(int i = 0; i < n; i++){
+        debug_printf("%10.6f ", a[i]);
+    }
+    return debug_printf("\n");
 }

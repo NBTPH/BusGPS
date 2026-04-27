@@ -47,4 +47,10 @@ bool invert(const float * a, float * ainv, const int n);
 
 bool jacobi_eigensystem(float *input_matrix, float *eigenvalues, float *eigenvectors, const int n);
 
+bool angle_between(const float * a, const float * b, float * c, const int n);
+
+int print_matrix(const float * a, const int m, const int n);
+
+int print_vector(const float * a, const int n);
+
 #endif
