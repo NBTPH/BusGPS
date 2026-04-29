@@ -380,7 +380,7 @@ void HMC5883_Calibration(uint32_t samples_num){
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            soft_iron_matrix[i][j] = 0;
+            soft_iron_matrix[i][j] = 0; //initalize to 0
             for (int m = 0; m < 3; m++) {
                 // V_{i,m} is M_eigenvectors[m*3 + i]
                 // sqrt(D_{m}) is sqrt(M_eigenvalues[m])
@@ -403,6 +403,13 @@ void HMC5883_Calibration(uint32_t samples_num){
         printf("]\n");
     }
     printf("\n");
+
+    if(!flash_write("hard_iron", (void*)hard_iron_bias, sizeof(hard_iron_bias))){
+        debug_printf("Failed writing hard iron bias calibrate data!\r\n");
+    }
+    if(!flash_write("soft_iron", (void*)soft_iron_matrix, sizeof(soft_iron_matrix))){
+        debug_printf("Failed writing soft iron matrix calibrate data!\r\n");
+    }
 }
 
 bool HMC5883_Init(i2c_master_dev_handle_t *input_hmc5883_dev){
@@ -425,13 +432,34 @@ bool HMC5883_Init(i2c_master_dev_handle_t *input_hmc5883_dev){
 
     enableMag();
 
-    if(!setOperateMode(HMC5883_OP_MODE_CONTINUOUS)) printf("Error: Failed to set Operation Mode\r\n");
+    if(!setOperateMode(HMC5883_OP_MODE_CONTINUOUS)) 
+        printf("Error: Failed to set Operation Mode\r\n");
 
-    if(!setMeasureMode(HMC5883_MEASURE_MODE_NORMAL)) printf("Error: Failed to set Measurement Mode\r\n");
+    if(!setMeasureMode(HMC5883_MEASURE_MODE_NORMAL)) 
+        printf("Error: Failed to set Measurement Mode\r\n");
 
-    if(!setMagGain(HMC5883_MAGGAIN_1_3)) printf("Error: Failed to set Magnetometer Gain\r\n");
+    if(!setMagGain(HMC5883_MAGGAIN_1_3)) 
+        printf("Error: Failed to set Magnetometer Gain\r\n");
 
-    if(!setMagRate(HMC5883_MAGRATE_30)) printf("Error: Failed to set Magnetometer Rate\r\n");
+    if(!setMagRate(HMC5883_MAGRATE_30)) 
+        printf("Error: Failed to set Magnetometer Rate\r\n");
+
+    if(!flash_read("hard_iron", (void*)hard_iron_bias, sizeof(hard_iron_bias)) 
+    || !flash_read("soft_iron", (void*)soft_iron_matrix, sizeof(soft_iron_matrix))){
+        printf("Magnetometer calibrate data loading failed\r\n");
+    }
+    else{
+        debug_printf("Magnetometer loaded calibrated results\r\n\n");
+        debug_printf("Hard iron bias (Gauss): x=%.6f y=%.6f z=%.6f\n\n", hard_iron_bias[0], hard_iron_bias[1], hard_iron_bias[2]);
+        debug_printf("Soft iron matrix W:\n");
+        for(int i = 0; i < 3; i++){
+            debug_printf("[ ");
+            for(int j = 0; j < 3; j++) printf("%10.6f ", soft_iron_matrix[i][j]);
+            debug_printf("]\n");
+        }
+        debug_printf("\n");
+    }
+
 
     return true;
 }

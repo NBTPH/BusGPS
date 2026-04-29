@@ -12,6 +12,7 @@
 #include <uart.h>
 #include <i2c.h>
 #include <button.h>
+#include <storage.h>
 
 // QueueSetHandle_t SensorQueues_set = NULL;
 
@@ -26,15 +27,13 @@ void app_main(void){
     HMC5883_Sensor_t HMC5883_Data = {0};
     float Heading = 0;
 
+    flash_storage_init();
+
     // xTaskCreate(TaskUART, "TaskUART/GPS read", 4096, NULL, 2, NULL);
     xTaskCreate(TaskI2C, "IMU/Mag read task", 4096, NULL, 3, NULL); //4KB stack
     xTaskCreate(TaskButton, "Button debounce task", 2048, NULL, 1, NULL); //2KB stack
-    
-    // SensorQueues_set = xQueueCreateSet(MPU6050_QUEUE_LENGTH + HMC5883_QUEUE_LENGTH);
-    // xQueueAddToSet(MPU6050_Queue, SensorQueues_set);
-    // xQueueAddToSet(HMC5883_Queue, SensorQueues_set);
 
-    bool on = true;
+    bool blink_on = true;
     int64_t last_print = millis();
     int64_t last_blink = millis();
     int64_t last_WDT_feed = millis();
@@ -83,8 +82,8 @@ void app_main(void){
 
         if(current_millis - last_blink >= 1000){
             last_blink = current_millis;
-            gpio_set_level(GPIO_NUM_2, on);
-            on = !on;
+            gpio_set_level(GPIO_NUM_2, blink_on);
+            blink_on = !blink_on;
         }
 
         if(current_millis - last_WDT_feed >= 4.8 * 1000){

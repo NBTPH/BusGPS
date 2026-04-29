@@ -367,6 +367,8 @@ void MPU6050_Calibration(uint32_t samples_num){
         gyro_bias.y = (float)accum_gyro_y / (float)samples_num;
         gyro_bias.z = (float)accum_gyro_z / (float)samples_num;
 
+        MPU6050_is_Calibrating = false;
+        
         printf("\n=========== MPU6050 Calibrations Completed ===========\r\n");
         printf("Calibrated results\r\n\n"
 
@@ -379,7 +381,12 @@ void MPU6050_Calibration(uint32_t samples_num){
                 "Gyroscope bias Z: %5f\r\n"
                 , accel_bias.x, accel_bias.y, accel_bias.z, gyro_bias.x, gyro_bias.y, gyro_bias.z);
 
-        MPU6050_is_Calibrating = false;
+        if(!flash_write("accel_bias", (void*)&accel_bias, sizeof(mpu6050_t))){
+            debug_printf("Failed writing accelerometer calibrate data!\r\n");
+        }
+        if(!flash_write("gyro_bias", (void*)&gyro_bias, sizeof(mpu6050_t))){
+            debug_printf("Failed writing Gyroscope calibrate data!\r\n");
+        }
     }
 }
 
@@ -429,5 +436,24 @@ bool MPU6050_Init(i2c_master_dev_handle_t *input_mpu6050_dev){
     if(!setI2CBypass(true)) //IMPORTANT for module such as the GY-87 where Magnetometer are connected to AUX I2C bus of MPU6050
         printf("Error: Failed to configure I2C Bypass\r\n");
 
+    if(!flash_read("accel_bias", (void*)&accel_bias, sizeof(mpu6050_t))){
+        printf("Accelerometer calibrate data loading failed\r\n");
+    }
+    else{
+        debug_printf("Accelerometer loaded calibrated results:\r\n"
+        "Accelerometer bias X: %5f\r\n"
+        "Accelerometer bias Y: %5f\r\n"
+        "Accelerometer bias Z: %5f\r\n\n", accel_bias.x, accel_bias.y, accel_bias.z);
+    }
+
+    if(!flash_read("gyro_bias", (void*)&gyro_bias, sizeof(mpu6050_t))){
+        printf("Gyroscope calibrate data loading failed\r\n");
+    }
+    else{
+        debug_printf("Gyroscope loaded calibrated results:\r\n"
+        "Gyroscope bias X: %5f\r\n"
+        "Gyroscope bias Y: %5f\r\n"
+        "Gyroscope bias Z: %5f\r\n", gyro_bias.x, gyro_bias.y, gyro_bias.z);
+    }
     return true;
 }

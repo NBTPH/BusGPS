@@ -2,6 +2,7 @@
 #define _HMC5883_U_H
 
 #include <common.h>
+#include <storage.h>
 #include <stdlib.h>
 #include <LinearAlgebra.h>
 #include "driver/i2c_master.h"

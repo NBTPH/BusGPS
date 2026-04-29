@@ -16,7 +16,7 @@ void delay(uint32_t ms){
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
-int debug_printf(const char *fmt, ...) {
+int debug_printf(const char *fmt, ...){
     va_list args;
     int result;
 

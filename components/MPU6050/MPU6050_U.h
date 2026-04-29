@@ -2,6 +2,7 @@
 #define _MPU6050_U_H
 
 #include <common.h>
+#include <storage.h>
 #include <stdlib.h>
 #include "esp_check.h"
 
