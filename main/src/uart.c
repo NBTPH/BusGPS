@@ -54,7 +54,8 @@ void TaskUART(void *pvParameters){
                     memcpy(cmd, p_cmd, length);
                     Parse_GGA_MSG(p_cmd, length, &GPS_GGA_data);
                 }
-            } 
+            }
+            // printf("%s\r\n\n", buffer);
             memset(buffer, 0, sizeof(buffer));
         }
     }

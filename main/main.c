@@ -6,20 +6,19 @@
 
 #include <common.h>
 #include <math.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "driver/gpio.h"
 #include <uart.h>
 #include <i2c.h>
 #include <button.h>
 #include <storage.h>
-
-// QueueSetHandle_t SensorQueues_set = NULL;
+#include <ekf.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
 
 void app_main(void){
     gpio_config_t config = {0};
     config.mode = GPIO_MODE_OUTPUT;
-    config.pin_bit_mask = 1ULL << GPIO_NUM_2;
+    config.pin_bit_mask = (1ULL << GPIO_NUM_2);
     ESP_ERROR_CHECK(gpio_config(&config));
 
     MPU6050_Sensor_t MPU6050_Data = {0};
@@ -29,7 +28,7 @@ void app_main(void){
 
     flash_storage_init();
 
-    // xTaskCreate(TaskUART, "TaskUART/GPS read", 4096, NULL, 2, NULL);
+    xTaskCreate(TaskUART, "TaskUART/GPS read", 4096, NULL, 2, NULL);
     xTaskCreate(TaskI2C, "IMU/Mag read task", 4096, NULL, 3, NULL); //4KB stack
     xTaskCreate(TaskButton, "Button debounce task", 2048, NULL, 1, NULL); //2KB stack
 
@@ -40,6 +39,8 @@ void app_main(void){
 
     delay(1); //wait for queues to be established in other tasks
     vTaskPrioritySet(NULL, 2);  //change main task to have higher priority than button task so that main task takes in data faster 
+
+    ekf_init(0.01, 0.01, 0.5, 0.01, 0.01);
     while(1){
         int64_t current_millis = millis();
         uint8_t msg_button = 5;
@@ -48,6 +49,8 @@ void app_main(void){
         if(xQueueReceive(MPU6050_Queue, (void *)&MPU6050_Data_Temp, 1) == pdTRUE){
             MPU6050_Data_Interval = MPU6050_Data_Temp.Timestamp - MPU6050_Data.Timestamp;
             MPU6050_Data = MPU6050_Data_Temp;
+            ekf_estimate(MPU6050_Data, (MPU6050_Data_Interval / 1000000.0f));
+            ekf_update_tilt(MPU6050_Data);
         }
         if(xQueueReceive(HMC5883_Queue, (void *)&HMC5883_Data, 1) == pdTRUE){
             float headingRad = atan2(-HMC5883_Data.y, HMC5883_Data.x); //calculate heading, the output is the angle value in radiant of North relative to X axis
@@ -57,6 +60,7 @@ void app_main(void){
             Heading += declinationAngle;
 
             if (Heading < 0)    Heading += 360;
+            ekf_update_heading(HMC5883_Data);
         }
         if(xQueueReceive(Button_Queue, (void *)&msg_button, 0) == pdTRUE){
             switch (msg_button){
@@ -73,11 +77,13 @@ void app_main(void){
 
         if(current_millis - last_print >= 100){
             last_print = current_millis;
-            printf("ACCEL X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Accel.x, MPU6050_Data.Accel.y, MPU6050_Data.Accel.z);
-            printf("GYRO X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Gyro.x, MPU6050_Data.Gyro.y, MPU6050_Data.Gyro.z);
-            printf("INTERVAL: %lld us\r\n", MPU6050_Data_Interval);
-            printf("MAG X: %5f Y: %5f Z: %5f\r\n", HMC5883_Data.x, HMC5883_Data.y, HMC5883_Data.z);
-            printf("HEADING: %10.6f degree\r\n\n\n", Heading);
+            // printf("ACCEL X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Accel.x, MPU6050_Data.Accel.y, MPU6050_Data.Accel.z);
+            // printf("GYRO X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Gyro.x, MPU6050_Data.Gyro.y, MPU6050_Data.Gyro.z);
+            // printf("INTERVAL: %lld us\r\n", MPU6050_Data_Interval);
+            printf("KALMAN FILTER: ROLL %5f PITCH %5f\r\n\n", (KalmanFilter.x[0] * (180.0f / M_PI)), (KalmanFilter.x[1] * (180.0f / M_PI)));
+            // printf("MAG X: %5f Y: %5f Z: %5f\r\n", HMC5883_Data.x, HMC5883_Data.y, HMC5883_Data.z);
+            printf("HEADING: %10.6f degree\r\n", Heading);
+            printf("KALMAN FILTER HEADING: %10.6f degree\r\n\n\n", (KalmanFilter.x[2] * (180.0f / M_PI)));
         }
 
         if(current_millis - last_blink >= 1000){

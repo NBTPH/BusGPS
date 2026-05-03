@@ -449,7 +449,7 @@ bool HMC5883_Init(i2c_master_dev_handle_t *input_hmc5883_dev){
         printf("Magnetometer calibrate data loading failed\r\n");
     }
     else{
-        debug_printf("Magnetometer loaded calibrated results\r\n\n");
+        debug_printf("Magnetometer loaded calibrated results\r\n");
         debug_printf("Hard iron bias (Gauss): x=%.6f y=%.6f z=%.6f\n\n", hard_iron_bias[0], hard_iron_bias[1], hard_iron_bias[2]);
         debug_printf("Soft iron matrix W:\n");
         for(int i = 0; i < 3; i++){
@@ -457,7 +457,7 @@ bool HMC5883_Init(i2c_master_dev_handle_t *input_hmc5883_dev){
             for(int j = 0; j < 3; j++) printf("%10.6f ", soft_iron_matrix[i][j]);
             debug_printf("]\n");
         }
-        debug_printf("\n");
+        debug_printf("\r\n\n");
     }
 
 

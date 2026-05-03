@@ -453,7 +453,7 @@ bool MPU6050_Init(i2c_master_dev_handle_t *input_mpu6050_dev){
         debug_printf("Gyroscope loaded calibrated results:\r\n"
         "Gyroscope bias X: %5f\r\n"
         "Gyroscope bias Y: %5f\r\n"
-        "Gyroscope bias Z: %5f\r\n", gyro_bias.x, gyro_bias.y, gyro_bias.z);
+        "Gyroscope bias Z: %5f\r\n\n", gyro_bias.x, gyro_bias.y, gyro_bias.z);
     }
     return true;
 }

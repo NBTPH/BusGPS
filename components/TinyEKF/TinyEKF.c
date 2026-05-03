@@ -1,3 +1,4 @@
+#include <LinearAlgebra.h>
 #include <TinyEKF.h>
 
 /**
@@ -26,8 +27,9 @@ static void ekf_initialize(ekf_t * ekf, const float *pdiag)
   * @param F Jacobian of state-transition function
   * @param Q process noise matrix
   * 
-  */static void ekf_predict(
-        ekf_t * ekf)
+  */
+void ekf_predict(
+        ekf_t *ekf)
 {        
     // \hat{x}_k = f(\hat{x}_{k-1}, u_k)
     memcpy(ekf->x, (ekf->fx), (ekf->EKF_N)*sizeof(float));
@@ -68,8 +70,8 @@ static void ekf_update_step3(ekf_t * ekf, float *GH)
   * @param R measurement-noise matrix
   * 
   */
-static bool ekf_update(
-        ekf_t * ekf)
+bool ekf_update(
+        ekf_t *ekf)
 {        
     // G_k = P_k H^T_k (H_k P_k H^T_k + R)^{-1}
     float G[(ekf->EKF_N)*(ekf->EKF_M)];
