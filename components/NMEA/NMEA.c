@@ -34,7 +34,37 @@ uint8_t Ql_Check_XOR(const char *pData, unsigned int Length){
     return result; 
 }
 
-static void print_gga_data(const GGA_MSG_t *msg) {
+bool Checksum_Valid(const char *const p_start, uint8_t *CSM_out){
+    //Start with validating CSM first
+    if(p_start == NULL){
+        printf("Error[Checksum_Valid]: MSG POINTER NOT PROVIDED \n\r");
+        return false;
+    }
+    char *p_asterisk = strchr(p_start, '*'); //find the '*' char
+    if(p_asterisk == NULL){
+        return false;
+    }
+    // printf("%c\n", (char)*p_str);
+    char CSM_MSG[3] = {0};
+    CSM_MSG[0] = p_asterisk[1];
+    CSM_MSG[1] = p_asterisk[2];
+    CSM_MSG[2] = '\0';
+
+    uint8_t CSM = strtol(CSM_MSG, NULL, 16); //convert those 2 ascii hex element to a number
+    uint8_t actual_CSM = Ql_Check_XOR(p_start, p_asterisk - p_start); //calculate actual checksum on string MSG of all strings between but not including the ‘$’ and the ‘*’ delimiters
+    // printf("Calculated CSM %d\n", actual_CSM);
+    if(actual_CSM != CSM){
+        printf("Error[Checksum_Valid]: CHECKSUM FAILED \n\r");
+        return false;
+    }
+    if(CSM_out != NULL){
+        *CSM_out = actual_CSM;
+    }
+        
+    return true;
+}
+
+void Print_GGA_Data(const GGA_MSG_t *msg){
     printf("================= NMEA GGA MESSAGE =================\n");
 
     // TIME
@@ -85,25 +115,24 @@ bool Parse_GGA_MSG(const char *const p_start, unsigned int Length, GGA_MSG_t *ms
     if(p_start == NULL || msg_data == NULL){
         return false;
     }
-    //$<TalkerID>GGA,<UTC>,<Lat>,<N/S>,<Lon>,<E/W>,<Quality>,<NumSatUsed>,<HDOP>,<Alt>,M,<Sep>,M,<DiffAge>,<DiffStation>*<Checksum><CR><LF>
-    printf("ENTER PARSING\n");
-    char parsed_buffer[20] = {0};
-    char temp_buffer[10] = {0};
+
+    if((char)*p_start != 'G'){ //p_start has to point to the first character of the message, not the '$' message starter
+        printf("Error[Parse_GGA_MSG]: Start of message misaligned\n\r");
+        return false;
+    }
 
     //Start with validating CSM first
-    const char *p_str = &p_start[Length - 3]; //pointer to the first element of checksum
-    // printf("%c\n", (char)*p_str);
-    strncpy(parsed_buffer, p_str, 2); //copy 2 elements from pointer
-    msg_data->CSM = strtol(parsed_buffer, NULL, 16); //convert those 2 ascii hex element to a number
-
-    uint8_t actual_CSM = Ql_Check_XOR(p_start, (p_str - 1) - p_start); //calculate actual checksum on string MSG
-    // printf("Calculated CSM %d\n", actual_CSM);
-    if(actual_CSM != msg_data->CSM){
+    if(!Checksum_Valid(p_start, &msg_data->CSM)){
         printf("Error[Parse_GGA_MSG]: CHECKSUM FAILED \n\r");
         return false;
     }
 
-    p_str = p_start + 6; //move to the first element of UTC
+    //$<TalkerID>GGA,<UTC>,<Lat>,<N/S>,<Lon>,<E/W>,<Quality>,<NumSatUsed>,<HDOP>,<Alt>,M,<Sep>,M,<DiffAge>,<DiffStation>*<Checksum><CR><LF>
+    debug_printf("ENTER PARSING [Parse_GGA_MSG]\r\n");
+    char parsed_buffer[20] = {0};
+    char temp_buffer[10] = {0};
+
+    const char *p_str = p_start + 6; //move to the first element of UTC
 
     //UTC
     char *next_comma = field_parse(parsed_buffer, sizeof(parsed_buffer), p_str);
@@ -128,8 +157,19 @@ bool Parse_GGA_MSG(const char *const p_start, unsigned int Length, GGA_MSG_t *ms
         p_str = p_str + 1; //move to N/S char
     }
     else{
-        msg_data->Lat = atof(parsed_buffer);
-        memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset buffer
+        //old logic, just straight copy with no calculations
+        // msg_data->Lat = atof(parsed_buffer);
+        // memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset buffer
+
+        strncpy(temp_buffer, &parsed_buffer[0], 2); //first two digit of Lat is Degrees
+        msg_data->Lat = atof(temp_buffer); //Set to degree
+
+        strcpy(temp_buffer, &parsed_buffer[2]); //rest of buffer is Minutes
+        msg_data->Lat += (atof(temp_buffer) / 60.0f); //Add Minutes
+        
+        memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset both
+        memset(temp_buffer, 0, sizeof(temp_buffer));
+
         p_str = next_comma + 1;//move to N/S char
     }
 
@@ -144,8 +184,19 @@ bool Parse_GGA_MSG(const char *const p_start, unsigned int Length, GGA_MSG_t *ms
         p_str = p_str + 1; //move to N/S char
     }
     else{
-        msg_data->Lon = atof(parsed_buffer);
-        memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset buffer
+        //old logic, just straight copy with no calculations
+        // msg_data->Lon = atof(parsed_buffer);
+        // memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset buffer
+
+        strncpy(temp_buffer, &parsed_buffer[0], 3); //first three digit of Lon is Degrees
+        msg_data->Lon = atof(temp_buffer); //Set to degree
+
+        strcpy(temp_buffer, &parsed_buffer[3]); //rest of buffer is Minutes
+        msg_data->Lon += (atof(temp_buffer) / 60.0f); //Add Minutes
+        
+        memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset both
+        memset(temp_buffer, 0, sizeof(temp_buffer));
+
         p_str = next_comma + 1;//move to N/S char
     }
 
@@ -196,12 +247,10 @@ bool Parse_GGA_MSG(const char *const p_start, unsigned int Length, GGA_MSG_t *ms
         msg_data->Sep = atof(parsed_buffer);
     }
 
-    print_gga_data(msg_data);
-
     return true;
 }
 
-static void print_rmc_data(const RMC_MSG_t *msg) {
+void Print_RMC_Data(const RMC_MSG_t *msg) {
     printf("================= NMEA RMC MESSAGE =================\n");
 
     printf(" DATE/TIME | %02d/%02d/20%02d at %02d:%02d:%05.2f UTC\n", 
@@ -244,25 +293,22 @@ bool Parse_RMC_MSG(const char *const p_start, unsigned int Length, RMC_MSG_t *ms
     if(p_start == NULL || msg_data == NULL){
         return false;
     }
-    // $<TalkerID>RMC,<UTC>,<Status>,<Lat>,<N/S>,<Lon>,<E/W>,<SOG>,<COG>,<Date>,<MagVar>,<MagVarDir>,<ModeInd>,<NavStatus>*<Checksum><CR><LF> 
-    printf("ENTER PARSING\n");
-    char parsed_buffer[20] = {0};
-    char temp_buffer[10] = {0};
+    if((char)*p_start != 'G'){ //p_start has to point to the first character of the message, not the '$' message starter
+        printf("Error[Parse_RMC_MSG]: Start of message misaligned\n\r");
+        return false;
+    }
 
     //Start with validating CSM first
-    const char *p_str = &p_start[Length - 3]; //pointer to the first element of checksum
-    // printf("%c\n", (char)*p_str);
-    strncpy(parsed_buffer, p_str, 2); //copy 2 elements from pointer
-    msg_data->CSM = strtol(parsed_buffer, NULL, 16); //convert those 2 ascii hex element to a number
-
-    uint8_t actual_CSM = Ql_Check_XOR(p_start, (p_str - 1) - p_start); //calculate actual checksum on string MSG
-    // printf("Calculated CSM %d\n", actual_CSM);
-    if(actual_CSM != msg_data->CSM){
+    if(!Checksum_Valid(p_start, &msg_data->CSM)){
         printf("Error[Parse_RMC_MSG]: CHECKSUM FAILED \n\r");
         return false;
     }
 
-    p_str = p_start + 6; //move to the first element of UTC
+    // $<TalkerID>RMC,<UTC>,<Status>,<Lat>,<N/S>,<Lon>,<E/W>,<SOG>,<COG>,<Date>,<MagVar>,<MagVarDir>,<ModeInd>,<NavStatus>*<Checksum><CR><LF> 
+    debug_printf("ENTER PARSING [Parse_RMC_MSG]\r\n");
+    char parsed_buffer[20] = {0};
+    char temp_buffer[10] = {0};
+    const char *p_str = p_start + 6; //move to the first element of UTC
 
     //UTC
     char *next_comma = field_parse(parsed_buffer, sizeof(parsed_buffer), p_str);
@@ -290,8 +336,19 @@ bool Parse_RMC_MSG(const char *const p_start, unsigned int Length, RMC_MSG_t *ms
         p_str = p_str + 1; //move to N/S char
     }
     else{
-        msg_data->Lat = atof(parsed_buffer);
-        memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset buffer
+        //old logic, just straight copy with no calculations
+        // msg_data->Lat = atof(parsed_buffer);
+        // memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset buffer
+
+        strncpy(temp_buffer, &parsed_buffer[0], 2); //first two digit of Lat is Degrees
+        msg_data->Lat = atof(temp_buffer); //Set to degree
+
+        strcpy(temp_buffer, &parsed_buffer[2]); //rest of buffer is Minutes
+        msg_data->Lat += (atof(temp_buffer) / 60.0f); //Add Minutes
+        
+        memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset both
+        memset(temp_buffer, 0, sizeof(temp_buffer));
+
         p_str = next_comma + 1;//move to N/S char
     }
 
@@ -306,8 +363,19 @@ bool Parse_RMC_MSG(const char *const p_start, unsigned int Length, RMC_MSG_t *ms
         p_str = p_str + 1; //move to N/S char
     }
     else{
-        msg_data->Lon = atof(parsed_buffer);
-        memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset buffer
+        //old logic, just straight copy with no calculations
+        // msg_data->Lon = atof(parsed_buffer);
+        // memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset buffer
+
+        strncpy(temp_buffer, &parsed_buffer[0], 3); //first three digit of Lon is Degrees
+        msg_data->Lon = atof(temp_buffer); //Set to degree
+
+        strcpy(temp_buffer, &parsed_buffer[3]); //rest of buffer is Minutes
+        msg_data->Lon += (atof(temp_buffer) / 60.0f); //Add Minutes
+        
+        memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset both
+        memset(temp_buffer, 0, sizeof(temp_buffer));
+
         p_str = next_comma + 1;//move to N/S char
     }
 
@@ -369,7 +437,71 @@ bool Parse_RMC_MSG(const char *const p_start, unsigned int Length, RMC_MSG_t *ms
     msg_data->NavStatus = (char)*p_str;
     p_str = p_str + 2; //moves into Checksum field
 
-    print_rmc_data(msg_data);
+    return true;
+}
+
+bool Parse_ACK_MSG(const char *const p_start, unsigned int Length, ACK_MSG_t *msg_data){
+    if(p_start == NULL || msg_data == NULL){
+        return false;
+    }
+    if((char)*p_start != 'P'){ //p_start has to point to the first character of the message, not the '$' message starter
+        printf("Error[Parse_ACK_MSG]: Start of message misaligned\n\r");
+        return false;
+    }
+
+    //Start with validating CSM first
+    if(!Checksum_Valid(p_start, NULL)){
+        printf("Error[Parse_ACK_MSG]: CHECKSUM FAILED \n\r");
+        return false;
+    }
+
+    //$PAIR001,<CommandID>,<Result>*<Checksum><CR><LF>
+
+    debug_printf("ENTER PARSING[Parse_ACK_MSG]\r\n");
+    char parsed_buffer[20] = {0};
+    const char *p_str = p_start + 8;
+
+    char *next_comma = field_parse(parsed_buffer, sizeof(parsed_buffer), p_str);
+    if(next_comma == NULL){//if it returns NULL, that means this field is empty
+        printf("Error[Parse_ACK_MSG]: PARSE FAILED \n\r");
+        return false;
+    }
+    else{
+        msg_data->CommandID = (uint16_t)atoi(parsed_buffer);
+        memset(parsed_buffer, 0, sizeof(parsed_buffer)); //reset buffer
+        p_str = next_comma + 1;//move to Result field
+    }
+
+    next_comma = field_parse(parsed_buffer, sizeof(parsed_buffer), p_str);
+    if(next_comma == NULL){//if it returns NULL, that means this field is empty
+        printf("Error[Parse_ACK_MSG]: PARSE FAILED \n\r");
+        return false;
+    }
+    else{
+        msg_data->Result = (uint8_t)atoi(parsed_buffer);
+    }
 
     return true;
-}   
+}
+
+void Set_Fix_Rate_MSG(uint16_t ms, char *out_tx_buffer){
+    if(out_tx_buffer == NULL){
+        return;
+    }
+    //clamp values into range
+    if(ms < 100){
+        ms = 100;
+    }
+    else if(ms > 1000){
+        ms = 1000;
+    }
+
+    char msg_body[32] = {0};
+    int body_len = snprintf(msg_body, sizeof(msg_body), "PAIR050,%u", ms);
+    if(body_len < 0 || body_len >= sizeof(msg_body)){
+        return; // Error in formatting
+    }
+    
+    uint8_t checksum = Ql_Check_XOR(msg_body, (unsigned int)body_len); //calculate checksum on message
+    snprintf(out_tx_buffer, 256, "$%s*%02X\r\n", msg_body, checksum); //append checksum to string
+}

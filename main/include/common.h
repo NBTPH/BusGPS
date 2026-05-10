@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define DEBUG_PRINT 1
+#define DEBUG_PRINT 0
 #define I2C_TIMEOUT_MS 20 
 
 int64_t millis();

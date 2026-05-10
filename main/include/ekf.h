@@ -11,6 +11,6 @@ void ekf_init(float init_roll, float init_pitch, float init_yaw, float init_Lat_
 void ekf_estimate(MPU6050_Sensor_t IMU, float timestep);
 void ekf_update_tilt(MPU6050_Sensor_t IMU);
 void ekf_update_heading(HMC5883_Sensor_t Mag);
-void ekf_update_position();
+void ekf_update_position(float Lat, float Lon, float SOG, float COG);
 
 #endif

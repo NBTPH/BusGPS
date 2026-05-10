@@ -82,8 +82,8 @@ void TaskI2C(void *pvParameters){
 
                 //same thing
                 mpu6050_data.Gyro.x = -y;
-                mpu6050_data.Gyro.y = -x;
-                mpu6050_data.Gyro.z = -z;                        
+                mpu6050_data.Gyro.y = -x;                    
+                mpu6050_data.Gyro.z = -z;     
 
                 if(xQueueSend(MPU6050_Queue, (void *)&mpu6050_data, 2) == errQUEUE_FULL){
                     printf("MPU6050 QUEUE FULL\r\n");
@@ -94,16 +94,17 @@ void TaskI2C(void *pvParameters){
             }
 
             if(HMC5883_DataReady()){
-                float x, y;
-                x = y = 0;
+                float x, y, z;
+                x = y = z = 0;
                 
                 getMagData(&x, 
                             &y, 
-                            &hmc5883_data.z);
+                            &z);
 
                 //same thing
                 hmc5883_data.x = -y;
                 hmc5883_data.y = -x;
+                hmc5883_data.z = -z;
 
                 if(xQueueSend(HMC5883_Queue, (void *)&hmc5883_data, 2) == errQUEUE_FULL){
                     printf("HMC5883 QUEUE FULL\r\n");

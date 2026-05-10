@@ -405,10 +405,10 @@ void HMC5883_Calibration(uint32_t samples_num){
     printf("\n");
 
     if(!flash_write("hard_iron", (void*)hard_iron_bias, sizeof(hard_iron_bias))){
-        debug_printf("Failed writing hard iron bias calibrate data!\r\n");
+        printf("Failed writing hard iron bias calibrate data!\r\n");
     }
     if(!flash_write("soft_iron", (void*)soft_iron_matrix, sizeof(soft_iron_matrix))){
-        debug_printf("Failed writing soft iron matrix calibrate data!\r\n");
+        printf("Failed writing soft iron matrix calibrate data!\r\n");
     }
 }
 
@@ -421,7 +421,7 @@ bool HMC5883_Init(i2c_master_dev_handle_t *input_hmc5883_dev){
     }
     hmc5883_dev_p = input_hmc5883_dev;
 
-    printf("Begin initalizing HMC5883\r\n");
+    printf("\r\nBegin initalizing HMC5883\r\n");
 
     uint8_t reg[4] = {0};
     read_bytes(HMC5883_REGISTER_MAG_IRA_REG_M, reg, 3);
@@ -446,18 +446,18 @@ bool HMC5883_Init(i2c_master_dev_handle_t *input_hmc5883_dev){
 
     if(!flash_read("hard_iron", (void*)hard_iron_bias, sizeof(hard_iron_bias)) 
     || !flash_read("soft_iron", (void*)soft_iron_matrix, sizeof(soft_iron_matrix))){
-        printf("Magnetometer calibrate data loading failed\r\n");
+        printf("\r\nMagnetometer calibrate data loading failed\r\n");
     }
     else{
-        debug_printf("Magnetometer loaded calibrated results\r\n");
-        debug_printf("Hard iron bias (Gauss): x=%.6f y=%.6f z=%.6f\n\n", hard_iron_bias[0], hard_iron_bias[1], hard_iron_bias[2]);
-        debug_printf("Soft iron matrix W:\n");
+        printf("\r\nMagnetometer loaded calibrated results\r\n");
+        printf("Hard iron bias (Gauss): x=%.6f y=%.6f z=%.6f\n", hard_iron_bias[0], hard_iron_bias[1], hard_iron_bias[2]);
+        printf("Soft iron matrix W:\n");
         for(int i = 0; i < 3; i++){
-            debug_printf("[ ");
+            printf("[ ");
             for(int j = 0; j < 3; j++) printf("%10.6f ", soft_iron_matrix[i][j]);
-            debug_printf("]\n");
+            printf("]\n");
         }
-        debug_printf("\r\n\n");
+        printf("\r\n\n");
     }
 
 

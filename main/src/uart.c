@@ -1,14 +1,42 @@
 #include <uart.h>
-
+#define BUFFER_SIZE 2048
 RMC_MSG_t GPS_RMC_data = {0};
 GGA_MSG_t GPS_GGA_data = {0};
+ACK_MSG_t GPS_ACK_data = {0};
+
+char buffer[BUFFER_SIZE] = {0};
+
+bool LC76G_Init(){
+    char tx_buffer[256] = {0};
+    Set_Fix_Rate_MSG(250, tx_buffer); //construct set fix rate message
+    uart_write_bytes(UART_NUM_2, tx_buffer, strlen(tx_buffer)); //send the message
+
+    memset(buffer, 0, sizeof(buffer));
+    bool ack_msg_found = false;
+    while(!ack_msg_found){ //wait until PAIR001 respond message found
+        int length = uart_read_bytes(UART_NUM_2, buffer, (BUFFER_SIZE - 1), 5);
+        if(length > 0){
+            char *p_msg = strstr(buffer, "$PAIR001"); //find PAIR001 message (we only use strstr when buffer is not empty do dont need to account for empty string)
+            if(p_msg != NULL){
+                ack_msg_found = true;
+                p_msg++; //move up one character, skiping '$'
+                char *carriage = strchr(p_msg, '\n'); //find the linefeed (end of message)
+                size_t length = carriage - p_msg; //calculate message length
+                if(length < 100){
+                    char cmd[100] = {0};
+                    memcpy(cmd, p_msg, length);
+                    Parse_ACK_MSG(p_msg, length, &GPS_ACK_data);
+                }
+            }
+            memset(buffer, 0, sizeof(buffer));
+        }
+    }
+
+    return (GPS_ACK_data.CommandID == 50) && (GPS_ACK_data.Result == 0);
+}
 
 void TaskUART(void *pvParameters){
     printf("UART task start\n");
-
-    const int BUFFER_SIZE = 2048;
-    char buffer[BUFFER_SIZE];
-    memset(buffer, 0, sizeof(buffer));
 
     uart_config_t uart_config = {
         .baud_rate = 115200,
@@ -23,40 +51,44 @@ void TaskUART(void *pvParameters){
     ESP_ERROR_CHECK(uart_param_config(UART_NUM_2, &uart_config));
     ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, TX_PIN, RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
-    int64_t last_millis = millis();
+    if(!LC76G_Init()){
+        printf("LC76G Initialize unsuccess\r\n");
+        return; //exit task
+    }
+    else{
+        printf("LC76G Initialize successfully\r\n");
+    }
 
     while(1){
         int length = uart_read_bytes(UART_NUM_2, buffer, (BUFFER_SIZE - 1), 5);
         if(length > 0){
-            int64_t current_millis = millis();
-            printf("Interval: %lld\n", current_millis - last_millis);
-            last_millis = current_millis;
-            char *p_cmd = strstr(buffer, "$GNRMC");
-            if(p_cmd != NULL){
-                p_cmd++; //move up one character to avoid the dollar sign
-                char *carriage = strchr(p_cmd, '\n'); //find the linefeed (end of message)
-                size_t length = carriage - p_cmd;
+            char *p_msg = strstr(buffer, "$GNRMC");
+            if(p_msg != NULL){
+                p_msg++; //move up one character to avoid the dollar sign
+                char *carriage = strchr(p_msg, '\n'); //find the linefeed (end of message)
+                size_t length = carriage - p_msg;
                 if(length < 100){
                     char cmd[100];
                     memset(cmd, 0, sizeof(cmd));
-                    memcpy(cmd, p_cmd, length);
-                    Parse_RMC_MSG(p_cmd, length, &GPS_RMC_data);
+                    memcpy(cmd, p_msg, length);
+                    Parse_RMC_MSG(p_msg, length, &GPS_RMC_data);
                 }
             }
-            p_cmd = strstr(buffer, "$GNGGA");
-            if(p_cmd != NULL){
-                p_cmd++; //move up one character to avoid the dollar sign
-                char *carriage = strchr(p_cmd, '\n'); //find the linefeed (end of message)
-                size_t length = carriage - p_cmd;
+            p_msg = strstr(buffer, "$GNGGA");
+            if(p_msg != NULL){
+                p_msg++; //move up one character to avoid the dollar sign
+                char *carriage = strchr(p_msg, '\n'); //find the linefeed (end of message)
+                size_t length = carriage - p_msg;
                 if(length < 100){
                     char cmd[100];
                     memset(cmd, 0, sizeof(cmd));
-                    memcpy(cmd, p_cmd, length);
-                    Parse_GGA_MSG(p_cmd, length, &GPS_GGA_data);
+                    memcpy(cmd, p_msg, length);
+                    Parse_GGA_MSG(p_msg, length, &GPS_GGA_data);
                 }
             }
             // printf("%s\r\n\n", buffer);
             memset(buffer, 0, sizeof(buffer));
         }
+        delay(10);
     }
 }

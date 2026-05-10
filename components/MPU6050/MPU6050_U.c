@@ -382,10 +382,10 @@ void MPU6050_Calibration(uint32_t samples_num){
                 , accel_bias.x, accel_bias.y, accel_bias.z, gyro_bias.x, gyro_bias.y, gyro_bias.z);
 
         if(!flash_write("accel_bias", (void*)&accel_bias, sizeof(mpu6050_t))){
-            debug_printf("Failed writing accelerometer calibrate data!\r\n");
+            printf("Failed writing accelerometer calibrate data!\r\n");
         }
         if(!flash_write("gyro_bias", (void*)&gyro_bias, sizeof(mpu6050_t))){
-            debug_printf("Failed writing Gyroscope calibrate data!\r\n");
+            printf("Failed writing Gyroscope calibrate data!\r\n");
         }
     }
 }
@@ -412,7 +412,7 @@ bool MPU6050_Init(i2c_master_dev_handle_t *input_mpu6050_dev){
     if(!setSampleRateDivisor(0)) 
         printf("Error: Failed to set Sample Rate Divisor\r\n");
 
-    if(!setFilterBandwidth(MPU6050_BAND_44_HZ)) 
+    if(!setFilterBandwidth(MPU6050_BAND_21_HZ)) 
         printf("Error: Failed to set Filter Bandwidth\r\n");
     
     if(!setGyroRange(MPU6050_RANGE_500_DEG)) 
@@ -437,23 +437,23 @@ bool MPU6050_Init(i2c_master_dev_handle_t *input_mpu6050_dev){
         printf("Error: Failed to configure I2C Bypass\r\n");
 
     if(!flash_read("accel_bias", (void*)&accel_bias, sizeof(mpu6050_t))){
-        printf("Accelerometer calibrate data loading failed\r\n");
+        printf("\r\nAccelerometer calibrate data loading failed\r\n");
     }
     else{
-        debug_printf("Accelerometer loaded calibrated results:\r\n"
+        printf("\r\nAccelerometer loaded calibrated results:\r\n"
         "Accelerometer bias X: %5f\r\n"
         "Accelerometer bias Y: %5f\r\n"
-        "Accelerometer bias Z: %5f\r\n\n", accel_bias.x, accel_bias.y, accel_bias.z);
+        "Accelerometer bias Z: %5f\r\n", accel_bias.x, accel_bias.y, accel_bias.z);
     }
 
     if(!flash_read("gyro_bias", (void*)&gyro_bias, sizeof(mpu6050_t))){
-        printf("Gyroscope calibrate data loading failed\r\n");
+        printf("\r\nGyroscope calibrate data loading failed\r\n");
     }
     else{
-        debug_printf("Gyroscope loaded calibrated results:\r\n"
+        printf("\r\nGyroscope loaded calibrated results:\r\n"
         "Gyroscope bias X: %5f\r\n"
         "Gyroscope bias Y: %5f\r\n"
-        "Gyroscope bias Z: %5f\r\n\n", gyro_bias.x, gyro_bias.y, gyro_bias.z);
+        "Gyroscope bias Z: %5f\r\n", gyro_bias.x, gyro_bias.y, gyro_bias.z);
     }
     return true;
 }

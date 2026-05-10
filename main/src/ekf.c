@@ -119,7 +119,6 @@ float R[NUM_OBSERVATIONS] = { //template all states measurement-noise matrix [M 
 
 float Lat_origin = 0, Lon_origin = 0;
 ekf_t KalmanFilter = {0};
-
 void ekf_init(float init_roll, float init_pitch, float init_yaw, float init_Lat_origin, float init_Lon_origin){
 	KalmanFilter.EKF_M = NUM_OBSERVATIONS;
 	KalmanFilter.EKF_N = NUM_STATES;
@@ -165,7 +164,7 @@ void ekf_estimate(MPU6050_Sensor_t IMU, float timestep){
     float cy = cosf(x[YAW_IDX]);
     float sy = sinf(x[YAW_IDX]);
 
-    //apply the rotation matrix to project 3D body accel to 2D earth accel (North/East)
+    //project 3D body accel to 2D North/East accel
     float accel_N = (cy * cp) * ax + (cy * sp * sr - sy * cr) * ay + (cy * sp * cr + sy * sr) * az;
     float accel_E = (sy * cp) * ax + (sy * sp * sr + cy * cr) * ay + (sy * sp * cr - cy * sr) * az;
 
@@ -319,6 +318,50 @@ void ekf_update_heading(HMC5883_Sensor_t Mag){
 	KalmanFilter.R = NULL; //restore back to NULL to avoid dangling pointer
 }
 
-void ekf_update_position(){
-    return;
+void ekf_update_position(float Lat, float Lon, float SOG, float COG){
+    KalmanFilter.EKF_M = 4; //there are 4 observations
+
+    SOG = SOG / 1.94384f; //SOG is in knots, convert it to m/s
+    COG = COG * (M_PI / 180.0f); //COG is in degree, convert it to radians for trigonometry functions
+
+    //calculate vel_N and vel_E fron COG and SOG
+    float vel_N_measure = SOG * cosf(COG);
+    float vel_E_measure = SOG * sinf(COG);
+
+    z[0] = vel_N_measure;
+	z[1] = vel_E_measure;
+
+    //convert Lat, Lon to NED coordinate from Lat_origin, Lon_origin
+    float dLat = Lat - Lat_origin;
+    float dLon = Lon - Lon_origin;
+    float pos_N_measure = dLat * 111320.0f; //one degree of latitude is about 111320 meters
+    float pos_E_measure = dLon * (111320.0f * cosf(Lat_origin * (M_PI / 180.0f))); //we have to scale with Latitude since Longitude converges at the pole, we need to know how close we are to the pole
+
+    z[2] = pos_N_measure;
+	z[3] = pos_E_measure;
+
+    //put predicted values into hx vector
+    hx[0] = x[VEL_N_IDX];
+    hx[1] = x[VEL_E_IDX];
+    hx[2] = x[POS_N_IDX];
+    hx[3] = x[POS_E_IDX];
+
+    float H[4 * NUM_STATES] = {0};
+	H[0 * NUM_STATES + VEL_N_IDX] = 1.0f; // Row 0 maps Obs Vel_N to Vel_N
+    H[1 * NUM_STATES + VEL_E_IDX] = 1.0f; // Row 1 maps Obs Vel_E to Vel_E
+    H[2 * NUM_STATES + POS_N_IDX] = 1.0f; // Row 0 maps Obs Pos_N to Pos_N
+    H[3 * NUM_STATES + POS_E_IDX] = 1.0f; // Row 1 maps Obs Pos_E to Pos_E
+	KalmanFilter.H = H;
+
+    float R_resized[4 * 4] = {0}; //construct R which is just a diagonal matrix with respective variance
+    R_resized[0 * 4 + 0] = R[OBS_VEL_N_IDX];
+    R_resized[1 * 4 + 1] = R[OBS_VEL_E_IDX];
+    R_resized[2 * 4 + 2] = R[OBS_POS_N_IDX];
+    R_resized[3 * 4 + 3] = R[OBS_POS_E_IDX];
+	KalmanFilter.R = R_resized;
+
+    ekf_update(&KalmanFilter);
+
+    KalmanFilter.H = NULL; //restore back to NULL to avoid dangling pointer
+	KalmanFilter.R = NULL; //restore back to NULL to avoid dangling pointer
 }
