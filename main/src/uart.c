@@ -4,8 +4,10 @@ RMC_MSG_t GPS_RMC_data = {0};
 GGA_MSG_t GPS_GGA_data = {0};
 ACK_MSG_t GPS_ACK_data = {0};
 
-char buffer[BUFFER_SIZE] = {0};
+QueueHandle_t GPS_Queue = NULL;
+bool GPS_Fixed = false;
 
+char buffer[BUFFER_SIZE] = {0};
 bool LC76G_Init(){
     char tx_buffer[256] = {0};
     Set_Fix_Rate_MSG(250, tx_buffer); //construct set fix rate message
@@ -37,6 +39,7 @@ bool LC76G_Init(){
 
 void TaskUART(void *pvParameters){
     printf("UART task start\n");
+    GPS_Queue = xQueueCreate(GPS_QUEUE_LENGTH, sizeof(GPS_t));
 
     uart_config_t uart_config = {
         .baud_rate = 115200,
@@ -59,22 +62,12 @@ void TaskUART(void *pvParameters){
         printf("LC76G Initialize successfully\r\n");
     }
 
+    GPS_t GPS_Data = {0};
+
     while(1){
         int length = uart_read_bytes(UART_NUM_2, buffer, (BUFFER_SIZE - 1), 5);
         if(length > 0){
-            char *p_msg = strstr(buffer, "$GNRMC");
-            if(p_msg != NULL){
-                p_msg++; //move up one character to avoid the dollar sign
-                char *carriage = strchr(p_msg, '\n'); //find the linefeed (end of message)
-                size_t length = carriage - p_msg;
-                if(length < 100){
-                    char cmd[100];
-                    memset(cmd, 0, sizeof(cmd));
-                    memcpy(cmd, p_msg, length);
-                    Parse_RMC_MSG(p_msg, length, &GPS_RMC_data);
-                }
-            }
-            p_msg = strstr(buffer, "$GNGGA");
+            char *p_msg = strstr(buffer, "$GNGGA"); //parse GGA first
             if(p_msg != NULL){
                 p_msg++; //move up one character to avoid the dollar sign
                 char *carriage = strchr(p_msg, '\n'); //find the linefeed (end of message)
@@ -86,8 +79,40 @@ void TaskUART(void *pvParameters){
                     Parse_GGA_MSG(p_msg, length, &GPS_GGA_data);
                 }
             }
+            p_msg = strstr(buffer, "$GNRMC");
+            if(p_msg != NULL){
+                p_msg++; //move up one character to avoid the dollar sign
+                char *carriage = strchr(p_msg, '\n'); //find the linefeed (end of message)
+                size_t length = carriage - p_msg;
+                if(length < 100){
+                    char cmd[100];
+                    memset(cmd, 0, sizeof(cmd));
+                    memcpy(cmd, p_msg, length);
+                    Parse_RMC_MSG(p_msg, length, &GPS_RMC_data);
+                }
+            }
             // printf("%s\r\n\n", buffer);
             memset(buffer, 0, sizeof(buffer));
+
+            if(GPS_GGA_data.Quality != 0 && GPS_RMC_data.Status != 'V'){ //Ensure that we have a reliable position fix
+                GPS_Fixed = true;
+
+                GPS_Data.DATE = GPS_RMC_data.DATE;
+                GPS_Data.UTC = GPS_GGA_data.UTC;
+                GPS_Data.Lat = GPS_GGA_data.Lat;
+                GPS_Data.NS = GPS_GGA_data.NS;
+                GPS_Data.Lon = GPS_GGA_data.Lon;
+                GPS_Data.EW = GPS_GGA_data.EW;
+                GPS_Data.Alt = GPS_GGA_data.Alt;
+                GPS_Data.SOG = GPS_RMC_data.SOG;
+                GPS_Data.COG = GPS_RMC_data.COG;
+                if(xQueueSend(GPS_Queue, (void *)&GPS_Data, 2) == errQUEUE_FULL){
+                    printf("GPS QUEUE FULL\r\n");
+                }
+            }
+            else{
+                GPS_Fixed = false;
+            }
         }
         delay(10);
     }

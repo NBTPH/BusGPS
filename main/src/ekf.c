@@ -119,7 +119,9 @@ float R[NUM_OBSERVATIONS] = { //template all states measurement-noise matrix [M 
 
 float Lat_origin = 0, Lon_origin = 0;
 ekf_t KalmanFilter = {0};
-void ekf_init(float init_roll, float init_pitch, float init_yaw, float init_Lat_origin, float init_Lon_origin){
+bool EKF_Origin_Set = false;
+
+void ekf_init(float init_roll, float init_pitch, float init_yaw){
 	KalmanFilter.EKF_M = NUM_OBSERVATIONS;
 	KalmanFilter.EKF_N = NUM_STATES;
 
@@ -138,9 +140,19 @@ void ekf_init(float init_roll, float init_pitch, float init_yaw, float init_Lat_
 	x[ROLL_IDX] = init_roll;
 	x[PITCH_IDX] = init_pitch;
 	x[YAW_IDX] = init_yaw;
+}
 
-	Lat_origin = init_Lat_origin;
+
+void ekf_set_origin(float init_Lat_origin, float init_Lon_origin){ //set origin for NE internal frame
+    //set 0 origin
+    Lat_origin = init_Lat_origin;
 	Lon_origin = init_Lon_origin;
+
+    //set position state back to 0
+    x[POS_N_IDX] = 0;
+    x[POS_E_IDX] = 0;
+
+    EKF_Origin_Set = true;
 }
 
 void ekf_estimate(MPU6050_Sensor_t IMU, float timestep){
@@ -324,7 +336,7 @@ void ekf_update_position(float Lat, float Lon, float SOG, float COG){
     SOG = SOG / 1.94384f; //SOG is in knots, convert it to m/s
     COG = COG * (M_PI / 180.0f); //COG is in degree, convert it to radians for trigonometry functions
 
-    //calculate vel_N and vel_E fron COG and SOG
+    //calculate vel_N and vel_E vector fron COG and SOG
     float vel_N_measure = SOG * cosf(COG);
     float vel_E_measure = SOG * sinf(COG);
 
@@ -349,8 +361,8 @@ void ekf_update_position(float Lat, float Lon, float SOG, float COG){
     float H[4 * NUM_STATES] = {0};
 	H[0 * NUM_STATES + VEL_N_IDX] = 1.0f; // Row 0 maps Obs Vel_N to Vel_N
     H[1 * NUM_STATES + VEL_E_IDX] = 1.0f; // Row 1 maps Obs Vel_E to Vel_E
-    H[2 * NUM_STATES + POS_N_IDX] = 1.0f; // Row 0 maps Obs Pos_N to Pos_N
-    H[3 * NUM_STATES + POS_E_IDX] = 1.0f; // Row 1 maps Obs Pos_E to Pos_E
+    H[2 * NUM_STATES + POS_N_IDX] = 1.0f; // Row 2 maps Obs Pos_N to Pos_N
+    H[3 * NUM_STATES + POS_E_IDX] = 1.0f; // Row 3 maps Obs Pos_E to Pos_E
 	KalmanFilter.H = H;
 
     float R_resized[4 * 4] = {0}; //construct R which is just a diagonal matrix with respective variance

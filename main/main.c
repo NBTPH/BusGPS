@@ -11,9 +11,22 @@
 #include <button.h>
 #include <storage.h>
 #include <ekf.h>
+#include <webpage.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
+
+typedef struct{
+    uint32_t ID;
+    Date_t Date;
+    UTC_t Time;
+    float Lat;
+    float Lon;
+    float Heading;
+    bool Ignition;
+    bool Door_Open;
+    bool AC;
+}DataFrame_t;
 
 void app_main(void){
     gpio_config_t config = {0};
@@ -25,9 +38,14 @@ void app_main(void){
     int64_t MPU6050_Data_Interval = 0;
     HMC5883_Sensor_t HMC5883_Data = {0};
     float Heading = 0;
+    GPS_t GPS_Data = {0};
+
+    DataFrame_t Message_Data = {0};
+    Message_Data.ID = 111205;
 
     flash_storage_init();
 
+    xTaskCreate(TaskWebpage, "TaskWebpage HTTP Webserver hosting", 4096, NULL, 2, NULL);
     xTaskCreate(TaskI2C, "IMU/Mag read task", 4096, NULL, 3, NULL); //4KB stack
     xTaskCreate(TaskButton, "Button debounce task", 2048, NULL, 1, NULL); //2KB stack
     xTaskCreate(TaskUART, "TaskUART/GPS read", 4096, NULL, 2, NULL);
@@ -40,7 +58,7 @@ void app_main(void){
     delay(1); //wait for queues to be established in other tasks
     vTaskPrioritySet(NULL, 2);  //change main task to have higher priority than button task so that main task takes in data faster 
 
-    ekf_init(0.01, 0.01, 0.5, 0.01, 0.01);
+    ekf_init(0.01, 0.01, 0.5);
     while(1){
         int64_t current_millis = millis();
         uint8_t msg_button = 5;
@@ -52,6 +70,7 @@ void app_main(void){
             ekf_estimate(MPU6050_Data, (MPU6050_Data_Interval / 1000000.0f));
             ekf_update_tilt(MPU6050_Data);
         }
+
         if(xQueueReceive(HMC5883_Queue, (void *)&HMC5883_Data, 1) == pdTRUE){
             float headingRad = atan2(-HMC5883_Data.y, HMC5883_Data.x); //calculate heading, the output is the angle value in radiant of North relative to X axis
             Heading = (headingRad * 180) / M_PI;
@@ -62,6 +81,16 @@ void app_main(void){
             if (Heading < 0)    Heading += 360;
             ekf_update_heading(HMC5883_Data);
         }
+
+        if(GPS_Fixed){ //only taking in queue data when GPS is fixed
+            if(xQueueReceive(GPS_Queue, (void *)&GPS_Data, 1) == pdTRUE){
+                if(!EKF_Origin_Set){ //if the ekf origin has not been set
+                    ekf_set_origin(GPS_Data.Lat, GPS_Data.Lon); //set the origin
+                }
+                ekf_update_position(GPS_Data.Lat, GPS_Data.Lon, GPS_Data.SOG, GPS_Data.COG);
+            }
+        }
+
         if(xQueueReceive(Button_Queue, (void *)&msg_button, 0) == pdTRUE){
             switch (msg_button){
                 case 0:
@@ -75,7 +104,7 @@ void app_main(void){
             }
         }
 
-        if(current_millis - last_print >= 100){
+        if(current_millis - last_print >= 1000){
             last_print = current_millis;
             // printf("ACCEL X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Accel.x, MPU6050_Data.Accel.y, MPU6050_Data.Accel.z);
             // printf("GYRO X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Gyro.x, MPU6050_Data.Gyro.y, MPU6050_Data.Gyro.z);
