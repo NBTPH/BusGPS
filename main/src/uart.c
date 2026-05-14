@@ -99,10 +99,8 @@ void TaskUART(void *pvParameters){
 
                 GPS_Data.DATE = GPS_RMC_data.DATE;
                 GPS_Data.UTC = GPS_GGA_data.UTC;
-                GPS_Data.Lat = GPS_GGA_data.Lat;
-                GPS_Data.NS = GPS_GGA_data.NS;
-                GPS_Data.Lon = GPS_GGA_data.Lon;
-                GPS_Data.EW = GPS_GGA_data.EW;
+                GPS_Data.Lat = GPS_GGA_data.NS == 'N' ? GPS_GGA_data.Lat : -GPS_GGA_data.Lat; //These values only output amplitude, the letters will determine them if they are positive or negative
+                GPS_Data.Lon = GPS_GGA_data.EW == 'E' ? GPS_GGA_data.Lon : -GPS_GGA_data.Lon;
                 GPS_Data.Alt = GPS_GGA_data.Alt;
                 GPS_Data.SOG = GPS_RMC_data.SOG;
                 GPS_Data.COG = GPS_RMC_data.COG;

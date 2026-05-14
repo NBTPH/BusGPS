@@ -19,9 +19,7 @@ typedef struct{
     Date_t DATE;
     UTC_t UTC;
     float Lat;
-    char NS;
     float Lon;
-    char EW;
     float Alt;
     float SOG; //Knots
     float COG; //Degree

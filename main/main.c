@@ -16,18 +16,6 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 
-typedef struct{
-    uint32_t ID;
-    Date_t Date;
-    UTC_t Time;
-    float Lat;
-    float Lon;
-    float Heading;
-    bool Ignition;
-    bool Door_Open;
-    bool AC;
-}DataFrame_t;
-
 void app_main(void){
     gpio_config_t config = {0};
     config.mode = GPIO_MODE_OUTPUT;
@@ -40,8 +28,7 @@ void app_main(void){
     float Heading = 0;
     GPS_t GPS_Data = {0};
 
-    DataFrame_t Message_Data = {0};
-    Message_Data.ID = 111205;
+    Global_Data.ID = 111205;
 
     flash_storage_init();
 
@@ -75,11 +62,11 @@ void app_main(void){
             float headingRad = atan2(-HMC5883_Data.y, HMC5883_Data.x); //calculate heading, the output is the angle value in radiant of North relative to X axis
             Heading = (headingRad * 180) / M_PI;
             float declinationAngle = -0.64166666666667; //declination angle in HCMC as of April 2026
-
             Heading += declinationAngle;
-
             if (Heading < 0)    Heading += 360;
+
             ekf_update_heading(HMC5883_Data);
+            get_heading(&Global_Data.Heading);
         }
 
         if(GPS_Fixed){ //only taking in queue data when GPS is fixed
@@ -88,6 +75,10 @@ void app_main(void){
                     ekf_set_origin(GPS_Data.Lat, GPS_Data.Lon); //set the origin
                 }
                 ekf_update_position(GPS_Data.Lat, GPS_Data.Lon, GPS_Data.SOG, GPS_Data.COG);
+                Global_Data.Date = GPS_Data.DATE;
+                Global_Data.Time = GPS_Data.UTC;
+                Global_Data.Lat = GPS_Data.Lat;
+                Global_Data.Lon = GPS_Data.Lon;
             }
         }
 
@@ -104,7 +95,7 @@ void app_main(void){
             }
         }
 
-        if(current_millis - last_print >= 1000){
+        if(current_millis - last_print >= 1000 && false){
             last_print = current_millis;
             // printf("ACCEL X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Accel.x, MPU6050_Data.Accel.y, MPU6050_Data.Accel.z);
             // printf("GYRO X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Gyro.x, MPU6050_Data.Gyro.y, MPU6050_Data.Gyro.z);

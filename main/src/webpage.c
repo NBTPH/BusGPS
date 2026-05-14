@@ -1,5 +1,5 @@
 #include <webpage.h>
-
+DataFrame_t Global_Data = {0};
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////// WiFi Stuff ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -14,11 +14,16 @@
 const char *AP_SSID = "";
 const char *AP_PASSWORD = "";
 
+const char *STA_SSID = "";
+const char *STA_PASSWORD = "";
+
 EventGroupHandle_t network_event_group;
 
 int retry_num = 0;
-static void connect_to_wifi_event_handler (void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data){ //wtf is all this shit?
+static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data){ //wtf is all this shit?
     EventGroupHandle_t wifi_event_group = *(EventGroupHandle_t *)arg;
+    
+    //Station mode events
     //if event is WiFi STATION start we attempt to connect to wifi
     if(event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START){
         esp_wifi_connect();
@@ -40,9 +45,19 @@ static void connect_to_wifi_event_handler (void* arg, esp_event_base_t event_bas
         retry_num = 0;
         xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
     }
+
+    //Access point mode events
+    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_AP_STACONNECTED) {
+        wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
+        printf("[WiFi_status] Client %02x:%02x:%02x:%02x:%02x:%02x connected to our AP, AID=%d\n", MAC2STR(event->mac), event->aid);
+    } 
+    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_AP_STADISCONNECTED) {
+        wifi_event_ap_stadisconnected_t* event = (wifi_event_ap_stadisconnected_t*) event_data;
+        printf("[WiFi_status] Client %02x:%02x:%02x:%02x:%02x:%02x disconnected from our AP, AID=%d\n", MAC2STR(event->mac), event->aid);
+    }
 }
 
-bool WiFi_init(){
+bool WiFi_init(bool ap_mode){
     debug_printf("[WiFi_status] Starting initializing WiFi");
 
     //Event group for wifi connection
@@ -60,9 +75,20 @@ bool WiFi_init(){
 
     //Create event loop for the network event group, wifi needs events to function
     ESP_ERROR_CHECK(esp_event_loop_create_default());
+    esp_event_handler_instance_t instance_any_id;
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
+                                                    ESP_EVENT_ANY_ID,
+                                                    &wifi_event_handler,
+                                                    &network_event_group,
+                                                    &instance_any_id)); //catch all WIFI events
 
     //Inititalize the TCP/IP WiFi network interface for Station mode 
-    esp_netif_create_default_wifi_sta();
+    if(ap_mode){
+        esp_netif_create_default_wifi_ap();
+    }
+    else{
+        esp_netif_create_default_wifi_sta();
+    }
 
     //Initialize WiFi peripheral, with disable NVS because we arent using that
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -71,41 +97,46 @@ bool WiFi_init(){
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM)); //only using RAM for WiFi handling
 
     //Configure WiFi
-    wifi_config_t wifi_config = {
-        .sta = {
-            .ssid = "",
-            .password = "",
-            /* Authmode threshold resets to WPA2 as default if password matches WPA2 standards (password len => 8).
-             * If you want to connect the device to deprecated WEP/WPA networks, Please set the threshold value
-             * to WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK and set the password with length and format matching to
-             * WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK standards.
-             */
-            .threshold.authmode = WIFI_AUTH_WPA2_PSK,
-        },
-    };
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    wifi_config_t wifi_config = {0};
+    if(ap_mode){
+        memcpy(&wifi_config.ap.ssid, AP_SSID, strlen(AP_SSID));
+        wifi_config.ap.ssid_len = strlen(AP_SSID);
+        memcpy(&wifi_config.ap.password, AP_PASSWORD, strlen(AP_PASSWORD));
+        wifi_config.ap.authmode = WIFI_AUTH_WPA2_PSK;
+        wifi_config.ap.max_connection = 4;
 
-    //Registering event
-    esp_event_handler_instance_t instance_any_id;
-    esp_event_handler_instance_t instance_got_ip;
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-                                                        ESP_EVENT_ANY_ID,
-                                                        &connect_to_wifi_event_handler,
-                                                        &network_event_group,
-                                                        &instance_any_id));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
-                                                        IP_EVENT_STA_GOT_IP,
-                                                        &connect_to_wifi_event_handler,
-                                                        &network_event_group,
-                                                        &instance_got_ip));
+        ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+        ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
+    }
+    else{
+        memcpy(&wifi_config.sta.ssid, STA_SSID, strlen(STA_SSID));
+        memcpy(&wifi_config.sta.password, STA_PASSWORD, strlen(STA_PASSWORD));
+        wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+
+        ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+        ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+
+        //Registering event
+        esp_event_handler_instance_t instance_got_ip;
+        ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
+                                                            IP_EVENT_STA_GOT_IP,
+                                                            &wifi_event_handler,
+                                                            &network_event_group,
+                                                            &instance_got_ip));
+    }
+
     return true;
 }
 
-bool WiFi_connect(){
-    printf("[WiFi_status] Starting connecting to WiFi");
+bool WiFi_start(bool ap_mode){
+    printf(ap_mode ? "[WiFi_status] Starting broadcasting WiFi" : "[WiFi_status] Starting connecting to WiFi");
     ESP_ERROR_CHECK(esp_wifi_start());
 
+    if(ap_mode){
+        printf("[WiFi_status] Access Point started successfully. SSID: %s\n", AP_SSID);
+        return true;
+    }
+    
     //Wait until wifi is connected(WIFI_CONNECTED_BIT) or connection failed(WIFI_FAIL_BIT)
     EventBits_t bits = xEventGroupWaitBits(network_event_group,
             WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
@@ -116,12 +147,12 @@ bool WiFi_connect(){
     //xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually happened
     if(bits & WIFI_CONNECTED_BIT){ //because bits is a bit mask so we use bit operator
         printf("[WiFi_status] Connected to AP SSID:%s password:%s",
-                 AP_SSID, AP_PASSWORD);
+                AP_SSID, AP_PASSWORD);
         return true;
     } 
     else if(bits & WIFI_FAIL_BIT){
         printf("[WiFi_status] Failed to connect to SSID:%s, password:%s",
-                 AP_SSID, AP_PASSWORD);
+                AP_SSID, AP_PASSWORD);
     } 
     else{
         printf("[WiFi_status] UNEXPECTED EVENT");
@@ -160,9 +191,9 @@ static const httpd_uri_t html_uri = {
 };
 
 //Struct and event handler for javascript
-static esp_err_t js_get_handler(httpd_req_t *req) {
+static esp_err_t js_get_handler(httpd_req_t *req){
     const size_t size = (coordinates_js_end - coordinates_js_start);
-    httpd_resp_set_type(req, "text/plain");
+    httpd_resp_set_type(req, "text/javascript");
     return httpd_resp_send(req, (const char *)coordinates_js_start, size);
 }
 
@@ -172,20 +203,61 @@ static const httpd_uri_t js_uri = {
     .handler   = js_get_handler    
 };
 
+static esp_err_t send_status_handler(httpd_req_t *req){
+    char status = GPS_Fixed ? '1' : '0';
+    httpd_resp_set_type(req, "text/plain");
+    return httpd_resp_send(req, (const char *)&status, 1);
+}
+
+static const httpd_uri_t status_get_uri = {
+    .uri       = "/get_status", //what the script will ask for
+    .method    = HTTP_GET,
+    .handler   = send_status_handler    
+};
+
 //Struct and event handler for updating the page
-float lat = 0, lon = 0;
-static esp_err_t send_msg_handler(httpd_req_t *req){
-    printf("GET VALUE CALLED\r\n");
-    char message[128] = {0};
-    snprintf(message, sizeof(message), "{\"lat\": %10.6f, \"lon\": %10.6f}", lat, lon);
+static esp_err_t send_data_handler(httpd_req_t *req){
+    char message[256] = {0};
+    snprintf(message, sizeof(message), "{"
+                                        "\"ID\": %ld, "
+                                        "\"Date\": {"
+                                            "\"Day\": %d, "
+                                            "\"Month\": %d, "
+                                            "\"Year\": %d"
+                                            "}, "
+                                        "\"UTC\": {"
+                                            "\"Hours\": %d, "
+                                            "\"Minutes\": %d, "
+                                            "\"Seconds\": %.6f"
+                                            "}, "
+                                        "\"Lat\": %.6f, "
+                                        "\"Lon\": %.6f, "
+                                        "\"Heading\": %.6f, "
+                                        "\"Ignition\": %s, "
+                                        "\"Door_Open\": %s, "
+                                        "\"AC\": %s"
+                                        "}", 
+                                        Global_Data.ID, 
+                                            Global_Data.Date.Day, 
+                                            Global_Data.Date.Month, 
+                                            Global_Data.Date.Year, 
+                                            Global_Data.Time.Hours, 
+                                            Global_Data.Time.Minutes, 
+                                            Global_Data.Time.Seconds, 
+                                        Global_Data.Lat, 
+                                        Global_Data.Lon, 
+                                        Global_Data.Heading, 
+                                        Global_Data.Ignition ? "true" : "false", 
+                                        Global_Data.Door_Open ? "true" : "false", 
+                                        Global_Data.AC ? "true" : "false");
     httpd_resp_set_type(req, "application/json");
     return httpd_resp_send(req, (const char *)message, strlen(message));
 }
 
-static const httpd_uri_t value_get_uri = {
-    .uri       = "/get_value", //what the html will ask for
+static const httpd_uri_t data_get_uri = {
+    .uri       = "/get_data", //what the script will ask for
     .method    = HTTP_GET,
-    .handler   = send_msg_handler    
+    .handler   = send_data_handler    
 };
 
 static httpd_handle_t HTTP_start(){
@@ -199,7 +271,8 @@ static httpd_handle_t HTTP_start(){
         debug_printf("[HTTP_Status] Registering URI handlers");
         httpd_register_uri_handler(server, &html_uri);
         httpd_register_uri_handler(server, &js_uri);
-        httpd_register_uri_handler(server, &value_get_uri);
+        httpd_register_uri_handler(server, &data_get_uri);
+        httpd_register_uri_handler(server, &status_get_uri);
         return server;
     }
 
@@ -214,21 +287,13 @@ static httpd_handle_t HTTP_start(){
 void TaskWebpage(void *pvParameters){
     printf("======= Webserver function started =======\r\n");
     
-    WiFi_init();
-    WiFi_connect();
+    WiFi_init(true);
+    WiFi_start(true);
 
     httpd_handle_t http_server = HTTP_start();
-
-    uint32_t RNG = 0;
-
-
     while(http_server){
         //while there are a server, we only need to change the value of lat and lon, the client will request an update on lat and lon
-        RNG = esp_random();
-        lat = 3.14159265358979323846;
-        RNG = esp_random();
-        lon = 3.14159265358979323846;
-        delay(10);
+        delay(1000);
     }
 }
 

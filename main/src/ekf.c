@@ -377,3 +377,26 @@ void ekf_update_position(float Lat, float Lon, float SOG, float COG){
     KalmanFilter.H = NULL; //restore back to NULL to avoid dangling pointer
 	KalmanFilter.R = NULL; //restore back to NULL to avoid dangling pointer
 }
+
+void get_tilt(float *roll, float *pitch){
+    *roll = x[ROLL_IDX] * (180.0f / M_PI);
+    *pitch = x[PITCH_IDX] * (180.0f / M_PI);
+}
+
+void get_heading(float *heading){
+    *heading = x[YAW_IDX] * (180.0f / M_PI);
+}
+
+void get_vel(float *vel_N, float *vel_E){
+    *vel_N = x[VEL_N_IDX];
+    *vel_E = x[VEL_E_IDX];
+}
+
+void get_pos(float *lat, float *lon){
+    float dlat = x[POS_N_IDX] / 111320.0f; //one degree of latitude is about 111320 meters, so we divivded by that to get degree from meter
+    *lat = Lat_origin + dlat;
+
+    float lat_origin_rad = Lat_origin * (M_PI / 180.0f); //conver lat origin to rad for cosf
+    float dlon = x[POS_E_IDX] / (111320.0f * lat_origin_rad);
+    *lon = Lon_origin + dlon;
+}
