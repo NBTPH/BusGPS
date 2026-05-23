@@ -11,10 +11,6 @@
 
 #define GPS_QUEUE_LENGTH 10
 
-extern RMC_MSG_t GPS_RMC_data;
-extern GGA_MSG_t GPS_GGA_data;
-extern ACK_MSG_t GPS_ACK_data;
-
 typedef struct{
     Date_t DATE;
     UTC_t UTC;

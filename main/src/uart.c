@@ -1,8 +1,7 @@
 #include <uart.h>
+#include <MPU6050.h>
+#include <HMC5883.h>
 #define BUFFER_SIZE 2048
-RMC_MSG_t GPS_RMC_data = {0};
-GGA_MSG_t GPS_GGA_data = {0};
-ACK_MSG_t GPS_ACK_data = {0};
 
 QueueHandle_t GPS_Queue = NULL;
 bool GPS_Fixed = false;
@@ -15,6 +14,8 @@ bool LC76G_Init(){
 
     memset(buffer, 0, sizeof(buffer));
     bool ack_msg_found = false;
+    ACK_MSG_t GPS_ACK_data = {0};
+
     while(!ack_msg_found){ //wait until PAIR001 respond message found
         int length = uart_read_bytes(UART_NUM_2, buffer, (BUFFER_SIZE - 1), 5);
         if(length > 0){
@@ -65,8 +66,11 @@ void TaskUART(void *pvParameters){
     GPS_t GPS_Data = {0};
 
     while(1){
-        int length = uart_read_bytes(UART_NUM_2, buffer, (BUFFER_SIZE - 1), 5);
+        int length = uart_read_bytes(UART_NUM_2, buffer, (BUFFER_SIZE - 1), 20);
         if(length > 0){
+            RMC_MSG_t GPS_RMC_data = {0};
+            GGA_MSG_t GPS_GGA_data = {0};
+
             char *p_msg = strstr(buffer, "$GNGGA"); //parse GGA first
             if(p_msg != NULL){
                 p_msg++; //move up one character to avoid the dollar sign
@@ -77,9 +81,11 @@ void TaskUART(void *pvParameters){
                     memset(cmd, 0, sizeof(cmd));
                     memcpy(cmd, p_msg, length);
                     Parse_GGA_MSG(p_msg, length, &GPS_GGA_data);
+                    // Print_GGA_Data(&GPS_GGA_data);
                 }
             }
-            p_msg = strstr(buffer, "$GNRMC");
+
+            p_msg = strstr(buffer, "$GNRMC"); //then parse RMC
             if(p_msg != NULL){
                 p_msg++; //move up one character to avoid the dollar sign
                 char *carriage = strchr(p_msg, '\n'); //find the linefeed (end of message)
@@ -89,12 +95,13 @@ void TaskUART(void *pvParameters){
                     memset(cmd, 0, sizeof(cmd));
                     memcpy(cmd, p_msg, length);
                     Parse_RMC_MSG(p_msg, length, &GPS_RMC_data);
+                    // Print_RMC_Data(&GPS_RMC_data);
                 }
             }
-            // printf("%s\r\n\n", buffer);
+            // printf("BUFFER CONTAINS:\r\n%s\r\n\n", buffer);
             memset(buffer, 0, sizeof(buffer));
 
-            if(GPS_GGA_data.Quality != 0 && GPS_RMC_data.Status != 'V'){ //Ensure that we have a reliable position fix
+            if(GPS_GGA_data.Quality != 0 && GPS_RMC_data.Status != 'V'){ //Ensure that we have a reliable position fix and correct parse
                 GPS_Fixed = true;
 
                 GPS_Data.DATE = GPS_RMC_data.DATE;
@@ -104,8 +111,10 @@ void TaskUART(void *pvParameters){
                 GPS_Data.Alt = GPS_GGA_data.Alt;
                 GPS_Data.SOG = GPS_RMC_data.SOG;
                 GPS_Data.COG = GPS_RMC_data.COG;
-                if(xQueueSend(GPS_Queue, (void *)&GPS_Data, 2) == errQUEUE_FULL){
-                    printf("GPS QUEUE FULL\r\n");
+                if(!MPU6050_is_Calibrating && !HMC5883_is_Calibrating){ //send to queue only when sensors are not calibrating so we dont fill up the queue
+                    if(xQueueSend(GPS_Queue, (void *)&GPS_Data, 2) == errQUEUE_FULL){
+                        printf("GPS QUEUE FULL\r\n");
+                    }
                 }
             }
             else{

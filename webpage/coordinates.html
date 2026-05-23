@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
     <link rel="icon" href="data:,">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESP32 Positioning Device</title>
     <style>
@@ -8,6 +9,17 @@
         .data-label { font-weight: bold; margin-right: 10px; }
         .status-bad { color: red; font-weight: bold; }
         .status-good { color: green; font-weight: bold; }
+        .status-calib { 
+            color: #f0ad4e; 
+            font-weight: bold; 
+            animation: pulse 1.5s infinite; 
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -23,6 +35,19 @@
         <li><span class="data-label">Latitude:</span> <span id="Lat">--</span></li>
         <li><span class="data-label">Longitude:</span> <span id="Lon">--</span></li>
         <li><span class="data-label">Heading:</span> <span id="Heading">--</span>&deg;</li>
+    </ul>
+
+    <h3>Debug Data</h3>
+    <ul>
+        <li><span class="data-label">Roll:</span> <span id="Roll">--</span></li>
+        <li><span class="data-label">Pitch:</span> <span id="Pitch">--</span></li>
+        <li><span class="data-label">Heading(Yaw):</span> <span id="Yaw">--</span>&deg;</li>
+        <li><span class="data-label">Velocity North:</span> <span id="Vel_N">--</span></li>
+        <li><span class="data-label">Velocity East:</span> <span id="Vel_E">--</span></li>
+        <li><span class="data-label">Position North:</span> <span id="Pos_N">--</span></li>
+        <li><span class="data-label">Position East:</span> <span id="Pos_E">--</span></li>
+        <li><span class="data-label">Latitude(GPS):</span> <span id="Lat_Raw">--</span></li>
+        <li><span class="data-label">Longitude(GPS):</span> <span id="Lon_Raw">--</span></li>
     </ul>
 
     <h3>Vehicle Status</h3>

@@ -20,5 +20,6 @@ void get_tilt(float *roll, float *pitch);
 void get_heading(float *heading);
 void get_vel(float *vel_N, float *vel_E);
 void get_pos(float *lat, float *lon);
+void get_NE_pos(float *pos_N, float *pos_E);
 
 #endif

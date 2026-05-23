@@ -1,5 +1,5 @@
-#ifndef STORAGE_H
-#define STORAGE_H
+#ifndef _STORAGE_H
+#define _STORAGE_H
 
 #include <common.h>
 #include "nvs_flash.h"

@@ -6,6 +6,7 @@
 #include <HMC5883.h>
 #include "freertos/FreeRTOS.h"
 #include "driver/i2c_master.h"
+#include "driver/gpio.h"
 
 #define SCL_PIN 22
 #define SDA_PIN 21

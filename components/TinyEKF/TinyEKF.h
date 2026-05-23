@@ -9,6 +9,7 @@
 #define _TinyEKF_H_
 
 #include <common.h>
+#include "esp_attr.h"
 
 /**
   * Floating-point precision defaults to single but can be made double via

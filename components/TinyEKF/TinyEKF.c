@@ -28,14 +28,13 @@ static void ekf_initialize(ekf_t * ekf, const float *pdiag)
   * @param Q process noise matrix
   * 
   */
-void ekf_predict(
+void IRAM_ATTR ekf_predict(
         ekf_t *ekf)
 {        
-    // \hat{x}_k = f(\hat{x}_{k-1}, u_k)
+    // x̂ₖ = f(x̂ₖ₋₁, uₖ)
     memcpy(ekf->x, (ekf->fx), (ekf->EKF_N)*sizeof(float));
 
-    
-    // P_k = F_{k-1} P_{k-1} F^T_{k-1} + Q_{k-1}
+    // Pₖ = Fₖ₋₁ Pₖ₋₁ Fₖ₋₁ᵀ + Qₖ₋₁
     float FP[(ekf->EKF_N)*(ekf->EKF_N)];
     memset(FP, 0, sizeof(FP));
     _mulmat(ekf->F, ekf->P,  FP, ekf->EKF_N, ekf->EKF_N, ekf->EKF_N);
@@ -70,10 +69,10 @@ static void ekf_update_step3(ekf_t * ekf, float *GH)
   * @param R measurement-noise matrix
   * 
   */
-bool ekf_update(
+bool IRAM_ATTR ekf_update(
         ekf_t *ekf)
 {        
-    // G_k = P_k H^T_k (H_k P_k H^T_k + R)^{-1}
+    //Gₖ = Pₖ Hₖᵀ (Hₖ Pₖ Hₖᵀ + R)⁻¹
     float G[(ekf->EKF_N)*(ekf->EKF_M)];
     memset(G, 0, sizeof(G));
     float Ht[(ekf->EKF_N)*(ekf->EKF_M)];
@@ -104,18 +103,18 @@ bool ekf_update(
     _mulmat(PHt, HPHtRinv, G, ekf->EKF_N, ekf->EKF_M, ekf->EKF_M);
 
 
-    // \hat{x}_k = \hat{x_k} + G_k(z_k - h(\hat{x}_k))
+    //x̂ₖ = x̂ₖ + Gₖ(zₖ - h(x̂ₖ))
     float z_hx[ekf->EKF_M];
     memset(z_hx, 0 , sizeof(z_hx));
     _sub(ekf->z, ekf->hx, z_hx, ekf->EKF_M);
 
-    float Gz_hx[(ekf->EKF_M)*(ekf->EKF_N)];
+    float Gz_hx[ekf->EKF_N];
     memset(Gz_hx, 0, sizeof(Gz_hx));
     _mulvec(G, z_hx, Gz_hx, ekf->EKF_N, ekf->EKF_M);
     _addvec(ekf->x, Gz_hx, ekf->x, ekf->EKF_N);
 
 
-    // P_k = (I - G_k H_k) P_k
+    //Pₖ = (I - Gₖ Hₖ) Pₖ
     float GH[(ekf->EKF_N)*(ekf->EKF_N)];
     memset(GH, 0, sizeof(GH));
     _mulmat(G, ekf->H, GH, ekf->EKF_N, ekf->EKF_M, ekf->EKF_N);

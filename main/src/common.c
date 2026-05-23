@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include "freertos/FreeRTOS.h"
 #include "esp_timer.h"
+#include "rom/ets_sys.h"
 
 int64_t millis(){
     int64_t result = esp_timer_get_time() / 1000;
@@ -14,6 +15,10 @@ int64_t micros(){
 
 void delay(uint32_t ms){
     vTaskDelay(pdMS_TO_TICKS(ms));
+}
+
+void delay_micros(uint32_t us){
+    ets_delay_us(us);
 }
 
 int debug_printf(const char *fmt, ...){

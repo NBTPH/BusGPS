@@ -2,8 +2,8 @@
  * Common include in all components and programs
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef _COMMON_H
+#define _COMMON_H
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -16,6 +16,7 @@
 int64_t millis();
 int64_t micros();
 void delay(uint32_t ms);
+void delay_micros(uint32_t us);
 int debug_printf(const char *fmt,...);
 
 #endif

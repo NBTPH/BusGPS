@@ -164,7 +164,7 @@ void ekf_estimate(MPU6050_Sensor_t IMU, float timestep){
     if(predicted_yaw < 0.0f) predicted_yaw += 2.0f * M_PI; //fmod keeps the negative sign, so we fix it
 	fx[YAW_IDX] = predicted_yaw;
 
-    float ax = (IMU.Accel.x * 9.80665)  - x[BIAS_A_X_IDX]; //(need to convert G force to m/s²)
+    float ax = (IMU.Accel.x * 9.80665) - x[BIAS_A_X_IDX]; //(need to convert G force to m/s²)
     float ay = (IMU.Accel.y * 9.80665) - x[BIAS_A_Y_IDX];
     float az = (IMU.Accel.z * 9.80665) - x[BIAS_A_Z_IDX];
 
@@ -245,8 +245,8 @@ void ekf_estimate(MPU6050_Sensor_t IMU, float timestep){
 	KalmanFilter.Q = Q_scaled;
 
 	//Calculate predictions
-	// x̂ₖ = f(x̂ₖ₋₁, uₖ) and 
-	// Pₖ = Fₖ₋₁ Pₖ₋₁ Fₖ₋₁ᵀ + Qₖ₋₁
+	//x̂ₖ = f(x̂ₖ₋₁, uₖ) and 
+	//Pₖ = Fₖ₋₁ Pₖ₋₁ Fₖ₋₁ᵀ + Qₖ₋₁
 	ekf_predict(&KalmanFilter);
 	KalmanFilter.Q = NULL; //restore back to NULL to avoid dangling pointer
 }
@@ -399,4 +399,9 @@ void get_pos(float *lat, float *lon){
     float lat_origin_rad = Lat_origin * (M_PI / 180.0f); //conver lat origin to rad for cosf
     float dlon = x[POS_E_IDX] / (111320.0f * lat_origin_rad);
     *lon = Lon_origin + dlon;
+}
+
+void get_NE_pos(float *pos_N, float *pos_E){
+    *pos_N = x[POS_N_IDX];
+    *pos_E = x[POS_E_IDX];
 }

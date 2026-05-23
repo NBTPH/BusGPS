@@ -145,37 +145,48 @@ bool HMC5883_DataReady(void){
     return reg;
 }
 
+uint8_t update_mag_range = 100;
+float _hmc5883_Gauss_LSB_XYZ = 1090;
 void getMagData(float *x, float *y, float *z){
     //get LSB sensitivity
-    hmc5883MagGain_t mag_gain = getMagGain();
-    float _hmc5883_Gauss_LSB_XYZ = 1090;
-    switch (mag_gain) {
-        case HMC5883_MAGGAIN_0_8:
-            _hmc5883_Gauss_LSB_XYZ = 1370;
-            break;
-        case HMC5883_MAGGAIN_1_3:
-            _hmc5883_Gauss_LSB_XYZ = 1090;
-            break;
-        case HMC5883_MAGGAIN_1_9:
-            _hmc5883_Gauss_LSB_XYZ = 820;
-            break;
-        case HMC5883_MAGGAIN_2_5:
-            _hmc5883_Gauss_LSB_XYZ = 660;
-            break;
-        case HMC5883_MAGGAIN_4_0:
-            _hmc5883_Gauss_LSB_XYZ = 440;
-            break;
-        case HMC5883_MAGGAIN_4_7:
-            _hmc5883_Gauss_LSB_XYZ = 390;
-            break;
-        case HMC5883_MAGGAIN_5_6:
-            _hmc5883_Gauss_LSB_XYZ = 330;
-            break;
-        case HMC5883_MAGGAIN_8_1:
-            _hmc5883_Gauss_LSB_XYZ = 230;
-            break;
-        default:
-            break;
+    if(update_mag_range == 100){
+        hmc5883MagGain_t mag_gain = getMagGain();
+        _hmc5883_Gauss_LSB_XYZ = 1090;
+        switch (mag_gain) {
+            case HMC5883_MAGGAIN_0_8:
+                _hmc5883_Gauss_LSB_XYZ = 1370;
+                break;
+            case HMC5883_MAGGAIN_1_3:
+                _hmc5883_Gauss_LSB_XYZ = 1090;
+                break;
+            case HMC5883_MAGGAIN_1_9:
+                _hmc5883_Gauss_LSB_XYZ = 820;
+                break;
+            case HMC5883_MAGGAIN_2_5:
+                _hmc5883_Gauss_LSB_XYZ = 660;
+                break;
+            case HMC5883_MAGGAIN_4_0:
+                _hmc5883_Gauss_LSB_XYZ = 440;
+                break;
+            case HMC5883_MAGGAIN_4_7:
+                _hmc5883_Gauss_LSB_XYZ = 390;
+                break;
+            case HMC5883_MAGGAIN_5_6:
+                _hmc5883_Gauss_LSB_XYZ = 330;
+                break;
+            case HMC5883_MAGGAIN_8_1:
+                _hmc5883_Gauss_LSB_XYZ = 230;
+                break;
+            default:
+                break;
+        }
+        update_mag_range--;
+    }
+    else{
+        update_mag_range--;
+        if(update_mag_range == 0){
+            update_mag_range = 100;
+        }
     }
 
     //get raw data

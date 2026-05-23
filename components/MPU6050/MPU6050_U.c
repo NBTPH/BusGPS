@@ -256,24 +256,37 @@ int16_t getTempRawData(void){
 }
 
 void getTempSensor(void);
+
+uint8_t update_accel_range = 100;
+float accel_scale = 1;
 void getAccelData(float *x, float *y, float *z){
     //get LSB sensitivity
-    mpu6050_accel_range_t accel_range = getAccelerometerRange();
-    float accel_scale = 1;
-    switch (accel_range){
-        case MPU6050_RANGE_16_G:
-            accel_scale = 2048;
-            break;
-        case MPU6050_RANGE_8_G:
-            accel_scale = 4096;
-            break;
-        case MPU6050_RANGE_4_G:
-            accel_scale = 8192;
-            break;
-        case MPU6050_RANGE_2_G:
-            accel_scale = 16384;
-            break;
+    if(update_accel_range == 100){
+        mpu6050_accel_range_t accel_range = getAccelerometerRange();
+        accel_scale = 1;
+        switch (accel_range){
+            case MPU6050_RANGE_16_G:
+                accel_scale = 2048;
+                break;
+            case MPU6050_RANGE_8_G:
+                accel_scale = 4096;
+                break;
+            case MPU6050_RANGE_4_G:
+                accel_scale = 8192;
+                break;
+            case MPU6050_RANGE_2_G:
+                accel_scale = 16384;
+                break;
+        }
+        update_accel_range--;
     }
+    else{
+        update_accel_range--;
+        if(update_accel_range == 0){
+            update_accel_range = 100;
+        }
+    }
+
     //get raw data
     int16_t x_raw, y_raw ,z_raw;
     x_raw = y_raw = z_raw = 0;
@@ -283,23 +296,35 @@ void getAccelData(float *x, float *y, float *z){
     *y = ((float)y_raw - accel_bias.y) / accel_scale;
     *z = ((float)z_raw - accel_bias.z) / accel_scale;
 }
+
+uint8_t update_gyro_range = 100;
+float gyro_scale = 1;
 void getGyroData(float *x, float *y, float *z){
     //get LSB sensitivity
-    mpu6050_gyro_range_t gyro_range = getGyroRange();
-    float gyro_scale = 1;
-    switch (gyro_range){
-        case MPU6050_RANGE_250_DEG:
-            gyro_scale = 131;
-            break;
-        case MPU6050_RANGE_500_DEG:
-            gyro_scale = 65.5;
-            break;
-        case MPU6050_RANGE_1000_DEG:
-            gyro_scale = 32.8;
-            break;
-        case MPU6050_RANGE_2000_DEG:
-            gyro_scale = 16.4;
-            break;
+    if(update_gyro_range == 100){
+        mpu6050_gyro_range_t gyro_range = getGyroRange();
+        gyro_scale = 1;
+        switch (gyro_range){
+            case MPU6050_RANGE_250_DEG:
+                gyro_scale = 131;
+                break;
+            case MPU6050_RANGE_500_DEG:
+                gyro_scale = 65.5;
+                break;
+            case MPU6050_RANGE_1000_DEG:
+                gyro_scale = 32.8;
+                break;
+            case MPU6050_RANGE_2000_DEG:
+                gyro_scale = 16.4;
+                break;
+        }
+        update_gyro_range--;
+    }
+    else{
+        update_gyro_range--;
+        if(update_gyro_range == 0){
+            update_gyro_range = 100;
+        }
     }
     
     //get raw data

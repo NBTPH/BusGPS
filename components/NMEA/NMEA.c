@@ -128,7 +128,6 @@ bool Parse_GGA_MSG(const char *const p_start, unsigned int Length, GGA_MSG_t *ms
     }
 
     //$<TalkerID>GGA,<UTC>,<Lat>,<N/S>,<Lon>,<E/W>,<Quality>,<NumSatUsed>,<HDOP>,<Alt>,M,<Sep>,M,<DiffAge>,<DiffStation>*<Checksum><CR><LF>
-    debug_printf("ENTER PARSING [Parse_GGA_MSG]\r\n");
     char parsed_buffer[20] = {0};
     char temp_buffer[10] = {0};
 
@@ -305,7 +304,6 @@ bool Parse_RMC_MSG(const char *const p_start, unsigned int Length, RMC_MSG_t *ms
     }
 
     // $<TalkerID>RMC,<UTC>,<Status>,<Lat>,<N/S>,<Lon>,<E/W>,<SOG>,<COG>,<Date>,<MagVar>,<MagVarDir>,<ModeInd>,<NavStatus>*<Checksum><CR><LF> 
-    debug_printf("ENTER PARSING [Parse_RMC_MSG]\r\n");
     char parsed_buffer[20] = {0};
     char temp_buffer[10] = {0};
     const char *p_str = p_start + 6; //move to the first element of UTC
@@ -456,8 +454,6 @@ bool Parse_ACK_MSG(const char *const p_start, unsigned int Length, ACK_MSG_t *ms
     }
 
     //$PAIR001,<CommandID>,<Result>*<Checksum><CR><LF>
-
-    debug_printf("ENTER PARSING[Parse_ACK_MSG]\r\n");
     char parsed_buffer[20] = {0};
     const char *p_str = p_start + 8;
 
