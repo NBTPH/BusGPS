@@ -9,6 +9,7 @@
 #include <uart.h>
 #include <i2c.h>
 #include <button.h>
+#include <distance.h>
 #include <storage.h>
 #include <ekf.h>
 #include <webpage.h>
@@ -27,7 +28,9 @@ void app_main(void){
     MPU6050_Sensor_t MPU6050_Data = {0};
     int64_t MPU6050_Data_Interval = 0;
     HMC5883_Sensor_t HMC5883_Data = {0};
+    DHT20_Sensor_t DHT20_Data = {0};
     GPS_t GPS_Data = {0};
+    float Distance_Data = 0;
     Global_Data.ID = 111205;
 
     TaskHandle_t TaskMQTT_handle = NULL;
@@ -40,14 +43,17 @@ void app_main(void){
         xTaskCreate(TaskMQTT, "MQTT send messages", 4096, NULL, 2, &TaskMQTT_handle);
     }
 
-    xTaskCreate(TaskI2C, "I2C IMU/Mag read task", 4096, NULL, 3, NULL);
-    xTaskCreate(TaskButton, "Button debounce task", 2048, NULL, 1, NULL);
+    xTaskCreate(TaskGY87, "GY87 IMU/Mag read task", 4096, NULL, 3, NULL);
+    xTaskCreate(TaskDHT20, "DHT20 read task", 4096, NULL, 2, NULL);
     xTaskCreate(TaskUART, "UART/GPS read", 4096, NULL, 3, NULL);
+    xTaskCreate(TaskDoor, "Door State/Ultra Sonic sensor read", 2048, NULL, 2, NULL);
+    xTaskCreate(TaskButton, "Button debounce task", 2048, NULL, 1, NULL);
     
     bool blink_on = true;
     int64_t last_print = millis();
     int64_t last_blink = millis();
     int64_t last_WDT_feed = millis();
+    uint8_t MPU6050_Polling_Count = 0;
 
     delay(1); //wait for queues to be established in other tasks before we call receive
     vTaskPrioritySet(NULL, 3);  //change main task to have higher priority than button task so that main task takes in and process data faster
@@ -57,15 +63,22 @@ void app_main(void){
         int64_t current_millis = millis();
         uint8_t msg_button = 5;
 
+        //Receiving data from MPU6050 (accelerometer & gyroscope)
         MPU6050_Sensor_t MPU6050_Data_Temp = {0};
-        if(xQueueReceive(MPU6050_Queue, (void *)&MPU6050_Data_Temp, 1) == pdTRUE){//get data from MPU6050
+        if(xQueueReceive(MPU6050_Queue, (void *)&MPU6050_Data_Temp, 1) == pdTRUE){
             MPU6050_Data_Interval = MPU6050_Data_Temp.Timestamp - MPU6050_Data.Timestamp;
             MPU6050_Data = MPU6050_Data_Temp;
             ekf_estimate(MPU6050_Data, (MPU6050_Data_Interval / 1000000.0f));
-            ekf_update_tilt(MPU6050_Data);
+            
+            MPU6050_Polling_Count++;
+            if(MPU6050_Polling_Count >= 4){
+                ekf_update_tilt(MPU6050_Data);
+                MPU6050_Polling_Count = 0;
+            }
         }
 
-        if(xQueueReceive(HMC5883_Queue, (void *)&HMC5883_Data, 1) == pdTRUE){ //get data from HMC5883
+        //Receiving data from HMC5883 (magnetometer)
+        if(xQueueReceive(HMC5883_Queue, (void *)&HMC5883_Data, 1) == pdTRUE){
             float headingRad = atan2(-HMC5883_Data.y, HMC5883_Data.x); //calculate heading, the output is the angle value in radiant of North relative to X axis
             debug_Heading = (headingRad * 180) / M_PI;
             float declinationAngle = -0.64166666666667; //declination angle in HCMC as of April 2026
@@ -76,6 +89,33 @@ void app_main(void){
             get_heading(&Global_Data.Heading);
         }
 
+        //Receiving data from DHT20 (temperature & humidity)
+        if(xQueueReceive(DHT20_Queue, (void *)&DHT20_Data, 0) == pdTRUE){ //no timeout and returns immediately because this sensor takes longer time
+            if(isnan(DHT20_Data.temp)){
+                Global_Data.Ignition = 0; 
+            }
+            else if(DHT20_Data.temp < ENGINE_IGNITION_THRESHOLD){
+                Global_Data.Ignition = 1; 
+            }
+            else{
+                Global_Data.Ignition = 2; 
+            }
+        }
+
+        //Receiving data from HC-SR04 (ultrasonic distance sensor)
+        if(xQueueReceive(Distance_Queue, (void *)&Distance_Data, 0) == pdTRUE){ //no timeout and returns immediately because this sensor takes longer time
+            if(isnan(Distance_Data)){
+                Global_Data.Door_Open = 0;
+            }
+            else if(Distance_Data < DISTANCE_DOOR_OPEN_THRESHOLD){
+                Global_Data.Door_Open = 1; 
+            }
+            else{
+                Global_Data.Door_Open = 2; 
+            }
+        }
+
+        //Receiving data from GPS (ultrasonic distance sensor)
         if(GPS_Fixed){ //only taking in queue data when GPS is fixed
             if(xQueueReceive(GPS_Queue, (void *)&GPS_Data, 1) == pdTRUE && (!MPU6050_is_Calibrating && !HMC5883_is_Calibrating)){ //only processing GPS when there are data arrives and sensors are not calibrating
                 if(!EKF_Origin_Set){ //if the ekf origin has not been set
@@ -92,7 +132,8 @@ void app_main(void){
             }
         }
 
-        if(xQueueReceive(Button_Queue, (void *)&msg_button, 0) == pdTRUE){//check if there are any button press
+        //Detect button press action
+        if(xQueueReceive(Button_Queue, (void *)&msg_button, 0) == pdTRUE){
             switch (msg_button){
                 case 0:
                     MPU6050_Calibration(5000);
@@ -105,7 +146,7 @@ void app_main(void){
             }
         }
 
-        if(current_millis - last_print >= 1000 && false){ //print debug
+        if(current_millis - last_print >= 1000 && true){ //print debug
             last_print = current_millis;
             // printf("ACCEL X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Accel.x, MPU6050_Data.Accel.y, MPU6050_Data.Accel.z);
             // printf("GYRO X: %5f Y: %5f Z: %5f\r\n", MPU6050_Data.Gyro.x, MPU6050_Data.Gyro.y, MPU6050_Data.Gyro.z);
@@ -113,6 +154,8 @@ void app_main(void){
             printf("KALMAN FILTER: ROLL %5f PITCH %5f\r\n", (KalmanFilter.x[0] * (180.0f / M_PI)), (KalmanFilter.x[1] * (180.0f / M_PI)));
             // printf("MAG X: %5f Y: %5f Z: %5f\r\n", HMC5883_Data.x, HMC5883_Data.y, HMC5883_Data.z);
             printf("HEADING: %10.6f degree\r\n", debug_Heading);
+            printf("DISTANCE: %10.6f degree\r\n", Distance_Data);
+            printf("TEMPERATURE: %10.6f degree\r\n", DHT20_Data.temp);
             printf("KALMAN FILTER HEADING: %10.6f degree\r\n\n\n", (KalmanFilter.x[2] * (180.0f / M_PI)));
         }
 

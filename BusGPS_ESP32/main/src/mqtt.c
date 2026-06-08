@@ -1,6 +1,32 @@
 #include <mqtt.h>
 
 bool DataFrame_2_JSON(char *buffer, size_t max_length, DataFrame_t data){
+    char ignition_str[64] = {0};
+    switch(data.Ignition){
+        case 0:
+            snprintf(ignition_str, sizeof(ignition_str), "null");
+            break;
+        case 1:
+            snprintf(ignition_str, sizeof(ignition_str), "false");
+            break;
+        case 2:
+            snprintf(ignition_str, sizeof(ignition_str), "true");
+            break;
+    }
+
+    char door_str[64] = {0};
+    switch(data.Door_Open){
+        case 0:
+            snprintf(door_str, sizeof(ignition_str), "null");
+            break;
+        case 1:
+            snprintf(door_str, sizeof(ignition_str), "false");
+            break;
+        case 2:
+            snprintf(door_str, sizeof(ignition_str), "true");
+            break;
+    }
+
     int ret = snprintf(buffer, max_length, "{"
                                                 "\"id\": %ld, "
                                                 "\"date\": {"
@@ -30,8 +56,8 @@ bool DataFrame_2_JSON(char *buffer, size_t max_length, DataFrame_t data){
                                             data.Lat, 
                                             data.Lon, 
                                             data.Heading, 
-                                            data.Ignition ? "true" : "false", 
-                                            data.Door_Open ? "true" : "false", 
+                                            ignition_str, 
+                                            door_str, 
                                             data.AC ? "true" : "false");
     if(ret < 0){
         return false;
@@ -88,7 +114,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 }
 
 void MQTT_Send_MSG(char *buff, size_t length){
-    int msg_id = esp_mqtt_client_publish(client, "busgps/testing", buff, length, 0, 0);
+    int msg_id = esp_mqtt_client_publish(client, "", buff, length, 0, 0);
     if(msg_id == 0){
         debug_printf("[MQTT_Status] publish message success: %s\r\n", buff);
     }
@@ -112,12 +138,11 @@ void TaskMQTT(void *pvParameters){
     esp_mqtt_client_start(client); //we start the connection
 
     int64_t last_MSG_millis = millis();
-    int64_t last_WDT_feed = millis();
     uint32_t msg_count = 1;
     while(1){
         int64_t current_millis = millis();
         char msg_out[512] = {0};
-        snprintf(msg_out, sizeof(msg_out), "[BusGPS %ld] [%lld]: ", msg_count, current_millis); //message headers are this messages index and time since startup
+        snprintf(msg_out, sizeof(msg_out), "[BusGPS %ld] [Message %ld] [%lld]: ", Global_Data.ID, msg_count, current_millis); //message headers are this messages index and time since startup
 
         if(ulTaskNotifyTake(pdTRUE, 1) > 0){ //if notification from main task is received, we are going to send data
             char json_msg[256] = {0};

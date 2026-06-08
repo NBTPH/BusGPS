@@ -10,7 +10,7 @@
 const char *AP_SSID = "CONFIG_AP_SSID";
 const char *AP_PASSWORD = "CONFIG_AP_PASSWORD";
 const char *STA_SSID = "CONFIG_STA_SSID";
-const char *STA_PASSWORD = "CONFIG_STA_SSID";
+const char *STA_PASSWORD = "CONFIG_STA_PASSWORD";
 
 EventGroupHandle_t network_event_group;
 bool WiFi_Connected = false;

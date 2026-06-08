@@ -14,8 +14,8 @@ typedef struct{
     float Lat;
     float Lon;
     float Heading;
-    bool Ignition;
-    bool Door_Open;
+    uint8_t Ignition; //0 means sensor not connected, 1 means engine not ignited, 2 means engine on
+    uint8_t Door_Open; //same as above
     bool AC;
 }DataFrame_t;
 
