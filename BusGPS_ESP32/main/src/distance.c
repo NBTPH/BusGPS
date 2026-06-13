@@ -44,34 +44,39 @@ void TaskDoor(void *pvParameters){
     int64_t last_print_millis = millis();
     while(1){
         //sending out 10us pulse to trig pin
-        int64_t current_millis = millis();
-        float distance = 0;
+        if(!MPU6050_is_Calibrating && !HMC5883_is_Calibrating){
+            int64_t current_millis = millis();
+            float distance = 0;
 
-        gpio_set_level(TRIG_PIN, 1);
-        delay_micros(10);
-        gpio_set_level(TRIG_PIN, 0);
-        
-        gpio_intr_enable(ECHO_PIN); //enable intr on TRIG pin
-        if(ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(50)) > 0){ //wait for pulse finished signal on ISR, set timeout to 50ms
-            int64_t pulse_length = pulse_end - pulse_start; //this is measured in microseconds
-            distance = ((pulse_length / 1000000.0f) * 340.0f) / 2.0f; //convert to seconds, then multiplyed with the speed of sound (about 343m/s in room temperature), divided by 2 to get to get distance
-            pulse_start = pulse_end = 0; //reset records
+            gpio_set_level(TRIG_PIN, 1);
+            delay_micros(10);
+            gpio_set_level(TRIG_PIN, 0);
+            
+            gpio_intr_enable(ECHO_PIN); //enable intr on TRIG pin
+            if(ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(50)) > 0){ //wait for pulse finished signal on ISR, set timeout to 50ms
+                int64_t pulse_length = pulse_end - pulse_start; //this is measured in microseconds
+                distance = ((pulse_length / 1000000.0f) * 340.0f) / 2.0f; //convert to seconds, then multiplyed with the speed of sound (about 343m/s in room temperature), divided by 2 to get to get distance
+                pulse_start = pulse_end = 0; //reset records
+                if(xQueueSend(Distance_Queue, (void *)&distance, 2) == errQUEUE_FULL){
+                    printf("DISTANCE QUEUE FULL\r\n");
+                }
+            }
+            else{
+                //Because the sensor still send a pulse about 36ms even if no objects detected, so if after 50ms no pulse detected, potentially faulty sensor or not connected
+                distance = NAN;
+                printf("[TaskDoor] Sensor not connected\r\n");
+                delay(2000);
+            }
+            gpio_intr_disable(ECHO_PIN); //disable intr on TRIG pin to avoid false triggers
+
             if(xQueueSend(Distance_Queue, (void *)&distance, 2) == errQUEUE_FULL){
                 printf("DISTANCE QUEUE FULL\r\n");
             }
+
+            delay(20); //sensor cool down
         }
         else{
-            //Because the sensor still send a pulse about 36ms even if no objects detected, so if after 50ms no pulse detected, potentially faulty sensor or not connected
-            distance = NAN;
-            printf("[TaskDoor] Sensor not connected\r\n");
-            delay(2000);
+            delay(1);
         }
-        gpio_intr_disable(ECHO_PIN); //disable intr on TRIG pin to avoid false triggers
-
-        if(xQueueSend(Distance_Queue, (void *)&distance, 2) == errQUEUE_FULL){
-            printf("DISTANCE QUEUE FULL\r\n");
-        }
-
-        delay(20); //sensor cool down
     }
 }

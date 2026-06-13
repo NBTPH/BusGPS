@@ -151,47 +151,52 @@ void TaskDHT20(void *pvParameters){
     bool dht20_detected = false;
 
     while(1){
-        int64_t current_millis = millis();
-        if(!dht20_detected){
-            if(DHT20_Init(&dht20_i2c_dev)){
-                dht20_detected = true;
-                printf("DHT20 initialized succesfully\n");
-                continue; //loop back so we don't have to wait
+        if(!MPU6050_is_Calibrating && !HMC5883_is_Calibrating){
+            int64_t current_millis = millis();
+            if(!dht20_detected){
+                if(DHT20_Init(&dht20_i2c_dev)){
+                    dht20_detected = true;
+                    printf("DHT20 initialized succesfully\n");
+                    continue; //loop back so we don't have to wait
+                }
+                printf("DHT20 failed to initialized or not conntected\n");
+                delay(2000);
             }
-            printf("DHT20 failed to initialized or not conntected\n");
-            delay(2000);
+            else{
+                delay(100); //fairly slow sensor
+                int read_return = DHT20_ReadData_NonBlocking();
+                switch(read_return){
+                    case 0: //success reading data
+                        DHT20_GetData(&dht20_data.humi, &dht20_data.temp);
+                        
+                        if(xQueueSend(DHT20_Queue, (void *)&dht20_data, 2) == errQUEUE_FULL){
+                            printf("DHT20 QUEUE FULL\r\n");
+                        }
+
+                        break;
+
+                    case 1: //busy reading data, just loop back to check until complete
+                        continue; 
+                        break;
+
+                    case 2: //timed out reading data
+                        dht20_detected = false; //reinitialize dht20
+                        printf("DHT20 failed to read, device might not be connected\n");
+                        dht20_data.humi = dht20_data.temp = NAN;
+
+                        if(xQueueSend(DHT20_Queue, (void *)&dht20_data, 2) == errQUEUE_FULL){
+                            printf("DHT20 QUEUE FULL\r\n");
+                        }
+                        break;
+
+                    default:
+                        continue;
+                        break;
+                }
+            }
         }
         else{
-            delay(100); //fairly slow sensor
-            int read_return = DHT20_ReadData_NonBlocking();
-            switch(read_return){
-                case 0: //success reading data
-                    DHT20_GetData(&dht20_data.humi, &dht20_data.temp);
-
-                    if(xQueueSend(DHT20_Queue, (void *)&dht20_data, 2) == errQUEUE_FULL){
-                        printf("DHT20 QUEUE FULL\r\n");
-                    }
-
-                    break;
-
-                case 1: //busy reading data, just loop back to check until complete
-                    continue; 
-                    break;
-
-                case 2: //timed out reading data
-                    dht20_detected = false; //reinitialize dht20
-                    printf("DHT20 failed to read, device might not be connected\n");
-                    dht20_data.humi = dht20_data.temp = NAN;
-
-                    if(xQueueSend(DHT20_Queue, (void *)&dht20_data, 2) == errQUEUE_FULL){
-                        printf("DHT20 QUEUE FULL\r\n");
-                    }
-                    break;
-
-                default:
-                    continue;
-                    break;
-            }
+            delay(1);
         }
     }
 }

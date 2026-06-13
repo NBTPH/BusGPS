@@ -19,6 +19,21 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 
+
+void Calibration_TaskHalt(TaskHandle_t *TaskHalt_arr){
+    printf("Calibration Halting Tasks\n");
+    for(uint8_t i = 0; i < 4; i++){
+        vTaskSuspend(TaskHalt_arr[i]);
+    }
+}
+
+void Calibration_TaskResume(TaskHandle_t *TaskHalt_arr){
+    printf("Calibration Resuming Tasks\n");
+    for(uint8_t i = 0; i < 4; i++){
+        vTaskResume(TaskHalt_arr[i]);
+    }
+}
+
 void app_main(void){
     gpio_config_t config = {0};
     config.mode = GPIO_MODE_OUTPUT;
@@ -33,6 +48,7 @@ void app_main(void){
     float Distance_Data = 0;
     Global_Data.ID = 111205;
 
+    TaskHandle_t CalibTaskArr[4] = {0};
     TaskHandle_t TaskMQTT_handle = NULL;
 
     flash_storage_init();
@@ -44,10 +60,10 @@ void app_main(void){
     }
 
     xTaskCreate(TaskGY87, "GY87 IMU/Mag read task", 4096, NULL, 3, NULL);
-    xTaskCreate(TaskDHT20, "DHT20 read task", 4096, NULL, 2, NULL);
-    xTaskCreate(TaskUART, "UART/GPS read", 4096, NULL, 3, NULL);
-    xTaskCreate(TaskDoor, "Door State/Ultra Sonic sensor read", 2048, NULL, 2, NULL);
-    xTaskCreate(TaskButton, "Button debounce task", 2048, NULL, 1, NULL);
+    xTaskCreate(TaskDHT20, "DHT20 read task", 4096, NULL, 2, &CalibTaskArr[0]);
+    xTaskCreate(TaskUART, "UART/GPS read", 4096, NULL, 3, &CalibTaskArr[1]);
+    xTaskCreate(TaskDoor, "Door State/Ultra Sonic sensor read", 2048, NULL, 2, &CalibTaskArr[2]);
+    xTaskCreate(TaskButton, "Button debounce task", 2048, NULL, 1, &CalibTaskArr[3]);
     
     bool blink_on = true;
     int64_t last_print = millis();
@@ -119,7 +135,7 @@ void app_main(void){
         if(GPS_Fixed){ //only taking in queue data when GPS is fixed
             if(xQueueReceive(GPS_Queue, (void *)&GPS_Data, 1) == pdTRUE && (!MPU6050_is_Calibrating && !HMC5883_is_Calibrating)){ //only processing GPS when there are data arrives and sensors are not calibrating
                 if(!EKF_Origin_Set){ //if the ekf origin has not been set
-                    ekf_set_origin(GPS_Data.Lat, GPS_Data.Lon); //set the origin
+                    ekf_set_origin(GPS_Data.Lat, GPS_Data.Lon, GPS_Data.SOG, GPS_Data.COG); //set the origin
                 }
                 ekf_update_position(GPS_Data.Lat, GPS_Data.Lon, GPS_Data.SOG, GPS_Data.COG);
                 debug_Lat = GPS_Data.Lat;
@@ -136,10 +152,16 @@ void app_main(void){
         if(xQueueReceive(Button_Queue, (void *)&msg_button, 0) == pdTRUE){
             switch (msg_button){
                 case 0:
+                    gpio_intr_disable(ECHO_PIN);
+                    Calibration_TaskHalt(CalibTaskArr);
                     MPU6050_Calibration(5000);
+                    Calibration_TaskResume(CalibTaskArr);
                     break;
                 case 1:
+                    gpio_intr_disable(ECHO_PIN);
+                    Calibration_TaskHalt(CalibTaskArr);
                     HMC5883_Calibration(200);
+                    Calibration_TaskResume(CalibTaskArr);
                     break;
                 default:
                     break;
@@ -154,7 +176,7 @@ void app_main(void){
             printf("KALMAN FILTER: ROLL %5f PITCH %5f\r\n", (KalmanFilter.x[0] * (180.0f / M_PI)), (KalmanFilter.x[1] * (180.0f / M_PI)));
             // printf("MAG X: %5f Y: %5f Z: %5f\r\n", HMC5883_Data.x, HMC5883_Data.y, HMC5883_Data.z);
             printf("HEADING: %10.6f degree\r\n", debug_Heading);
-            printf("DISTANCE: %10.6f degree\r\n", Distance_Data);
+            printf("DISTANCE: %10.6f meters\r\n", Distance_Data);
             printf("TEMPERATURE: %10.6f degree\r\n", DHT20_Data.temp);
             printf("KALMAN FILTER HEADING: %10.6f degree\r\n\n\n", (KalmanFilter.x[2] * (180.0f / M_PI)));
         }

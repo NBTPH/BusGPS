@@ -1,0 +1,2283 @@
+[
+
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 3.5
+        },
+        "lat": 10.7827396,
+        "lon": 106.6636124,
+        "heading": 86.1731873,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 3.75
+        },
+        "lat": 10.7827396,
+        "lon": 106.6636124,
+        "heading": 86.1806564,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 4.0
+        },
+        "lat": 10.7827387,
+        "lon": 106.66362,
+        "heading": 86.1814423,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 4.25
+        },
+        "lat": 10.7827387,
+        "lon": 106.66362,
+        "heading": 86.169342,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 4.5
+        },
+        "lat": 10.7827387,
+        "lon": 106.66362,
+        "heading": 86.1492004,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 4.75
+        },
+        "lat": 10.7827387,
+        "lon": 106.66362,
+        "heading": 86.1460724,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 5.0
+        },
+        "lat": 10.7827387,
+        "lon": 106.6636124,
+        "heading": 86.1617508,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 5.25
+        },
+        "lat": 10.7827387,
+        "lon": 106.6636124,
+        "heading": 86.1560516,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 5.5
+        },
+        "lat": 10.7827387,
+        "lon": 106.6636047,
+        "heading": 86.1399384,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 5.75
+        },
+        "lat": 10.7827396,
+        "lon": 106.6635971,
+        "heading": 86.1371155,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 6.0
+        },
+        "lat": 10.7827396,
+        "lon": 106.6635895,
+        "heading": 86.1295547,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 6.25
+        },
+        "lat": 10.7827396,
+        "lon": 106.6635895,
+        "heading": 86.1429367,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 6.5
+        },
+        "lat": 10.7827406,
+        "lon": 106.6635818,
+        "heading": 86.13694,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 6.75
+        },
+        "lat": 10.7827406,
+        "lon": 106.6635818,
+        "heading": 86.1087723,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 7.0
+        },
+        "lat": 10.7827415,
+        "lon": 106.6635742,
+        "heading": 86.1103592,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 7.25
+        },
+        "lat": 10.7827415,
+        "lon": 106.6635742,
+        "heading": 86.1138306,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 7.5
+        },
+        "lat": 10.7827425,
+        "lon": 106.6635666,
+        "heading": 86.0999908,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 7.75
+        },
+        "lat": 10.7827425,
+        "lon": 106.663559,
+        "heading": 86.0755692,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 8.0
+        },
+        "lat": 10.7827435,
+        "lon": 106.663559,
+        "heading": 86.0862656,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 8.25
+        },
+        "lat": 10.7827435,
+        "lon": 106.663559,
+        "heading": 86.0751724,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 8.5
+        },
+        "lat": 10.7827425,
+        "lon": 106.6635513,
+        "heading": 86.0868225,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 8.75
+        },
+        "lat": 10.7827425,
+        "lon": 106.6635513,
+        "heading": 86.0967636,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 9.0
+        },
+        "lat": 10.7827425,
+        "lon": 106.6635513,
+        "heading": 86.1005554,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 9.25
+        },
+        "lat": 10.7827415,
+        "lon": 106.6635513,
+        "heading": 86.1007843,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 9.5
+        },
+        "lat": 10.7827415,
+        "lon": 106.6635513,
+        "heading": 86.1080856,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 9.75
+        },
+        "lat": 10.7827406,
+        "lon": 106.6635513,
+        "heading": 86.1154633,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 10.0
+        },
+        "lat": 10.7827406,
+        "lon": 106.6635513,
+        "heading": 86.1019974,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 10.25
+        },
+        "lat": 10.7827406,
+        "lon": 106.6635513,
+        "heading": 86.1031189,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 10.5
+        },
+        "lat": 10.7827406,
+        "lon": 106.6635513,
+        "heading": 86.0825348,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 10.75
+        },
+        "lat": 10.7827396,
+        "lon": 106.6635513,
+        "heading": 86.0637894,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 11.0
+        },
+        "lat": 10.7827396,
+        "lon": 106.6635513,
+        "heading": 86.0863876,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 11.25
+        },
+        "lat": 10.7827396,
+        "lon": 106.6635513,
+        "heading": 86.089859,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 11.5
+        },
+        "lat": 10.7827387,
+        "lon": 106.6635437,
+        "heading": 86.1101379,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 11.75
+        },
+        "lat": 10.7827387,
+        "lon": 106.6635437,
+        "heading": 86.1160965,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 12.0
+        },
+        "lat": 10.7827387,
+        "lon": 106.6635437,
+        "heading": 86.1158752,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 12.25
+        },
+        "lat": 10.7827387,
+        "lon": 106.6635437,
+        "heading": 86.0933075,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 12.5
+        },
+        "lat": 10.7827377,
+        "lon": 106.6635437,
+        "heading": 86.088623,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 12.75
+        },
+        "lat": 10.7827377,
+        "lon": 106.6635437,
+        "heading": 86.0922165,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 13.0
+        },
+        "lat": 10.7827377,
+        "lon": 106.6635437,
+        "heading": 86.1008835,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 13.25
+        },
+        "lat": 10.7827377,
+        "lon": 106.6635437,
+        "heading": 86.120636,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 13.5
+        },
+        "lat": 10.7827368,
+        "lon": 106.6635437,
+        "heading": 86.1188202,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 13.75
+        },
+        "lat": 10.7827368,
+        "lon": 106.6635437,
+        "heading": 86.1029739,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 14.0
+        },
+        "lat": 10.7827368,
+        "lon": 106.6635437,
+        "heading": 86.1167526,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 14.25
+        },
+        "lat": 10.7827368,
+        "lon": 106.6635437,
+        "heading": 86.1225052,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 14.5
+        },
+        "lat": 10.7827358,
+        "lon": 106.6635437,
+        "heading": 86.1040955,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 14.75
+        },
+        "lat": 10.7827358,
+        "lon": 106.6635437,
+        "heading": 86.1108322,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 15.0
+        },
+        "lat": 10.7827358,
+        "lon": 106.6635437,
+        "heading": 86.1040955,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 15.25
+        },
+        "lat": 10.7827358,
+        "lon": 106.6635437,
+        "heading": 86.1009521,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 15.5
+        },
+        "lat": 10.7827358,
+        "lon": 106.6635437,
+        "heading": 86.119278,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 15.75
+        },
+        "lat": 10.7827349,
+        "lon": 106.6635437,
+        "heading": 86.1229858,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 16.0
+        },
+        "lat": 10.7827349,
+        "lon": 106.6635437,
+        "heading": 86.1187515,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 16.25
+        },
+        "lat": 10.7827349,
+        "lon": 106.6635437,
+        "heading": 86.126297,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 16.5
+        },
+        "lat": 10.7827349,
+        "lon": 106.6635437,
+        "heading": 86.1274872,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 16.75
+        },
+        "lat": 10.7827349,
+        "lon": 106.6635437,
+        "heading": 86.1390228,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 17.0
+        },
+        "lat": 10.7827339,
+        "lon": 106.6635361,
+        "heading": 86.1379776,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 17.25
+        },
+        "lat": 10.7827339,
+        "lon": 106.6635361,
+        "heading": 86.1329498,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 17.5
+        },
+        "lat": 10.7827339,
+        "lon": 106.6635361,
+        "heading": 86.1324387,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 17.75
+        },
+        "lat": 10.7827339,
+        "lon": 106.6635361,
+        "heading": 86.136322,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 18.0
+        },
+        "lat": 10.7827339,
+        "lon": 106.6635361,
+        "heading": 86.1461868,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 18.25
+        },
+        "lat": 10.7827339,
+        "lon": 106.6635361,
+        "heading": 86.1379166,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 18.5
+        },
+        "lat": 10.7827339,
+        "lon": 106.6635361,
+        "heading": 86.1466904,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 18.75
+        },
+        "lat": 10.782733,
+        "lon": 106.6635361,
+        "heading": 86.1661682,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 19.0
+        },
+        "lat": 10.782733,
+        "lon": 106.6635361,
+        "heading": 86.1600647,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 19.25
+        },
+        "lat": 10.782733,
+        "lon": 106.6635361,
+        "heading": 86.1724701,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 19.5
+        },
+        "lat": 10.782733,
+        "lon": 106.6635361,
+        "heading": 86.1602325,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 19.75
+        },
+        "lat": 10.782733,
+        "lon": 106.6635361,
+        "heading": 86.1612091,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 20.0
+        },
+        "lat": 10.782733,
+        "lon": 106.6635361,
+        "heading": 86.1694107,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 20.25
+        },
+        "lat": 10.782733,
+        "lon": 106.6635361,
+        "heading": 86.1475067,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 20.5
+        },
+        "lat": 10.782732,
+        "lon": 106.6635361,
+        "heading": 86.1651077,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 20.75
+        },
+        "lat": 10.782732,
+        "lon": 106.6635361,
+        "heading": 86.1690903,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 21.0
+        },
+        "lat": 10.782732,
+        "lon": 106.6635361,
+        "heading": 86.1668091,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 21.25
+        },
+        "lat": 10.782732,
+        "lon": 106.6635361,
+        "heading": 86.1631699,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 21.5
+        },
+        "lat": 10.782732,
+        "lon": 106.6635361,
+        "heading": 86.1700516,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 21.75
+        },
+        "lat": 10.782732,
+        "lon": 106.6635361,
+        "heading": 86.170166,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 22.0
+        },
+        "lat": 10.782732,
+        "lon": 106.6635361,
+        "heading": 86.1599579,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 22.25
+        },
+        "lat": 10.782732,
+        "lon": 106.6635361,
+        "heading": 86.1601257,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 22.5
+        },
+        "lat": 10.782732,
+        "lon": 106.6635361,
+        "heading": 86.1555786,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 22.75
+        },
+        "lat": 10.7827311,
+        "lon": 106.6635361,
+        "heading": 86.1343079,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 23.0
+        },
+        "lat": 10.7827311,
+        "lon": 106.6635361,
+        "heading": 86.1229706,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 23.25
+        },
+        "lat": 10.7827311,
+        "lon": 106.6635361,
+        "heading": 86.1167221,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 23.5
+        },
+        "lat": 10.7827311,
+        "lon": 106.6635361,
+        "heading": 86.1242676,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 23.75
+        },
+        "lat": 10.7827301,
+        "lon": 106.6635361,
+        "heading": 86.1157684,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 24.0
+        },
+        "lat": 10.7827291,
+        "lon": 106.6635361,
+        "heading": 86.0986176,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 24.25
+        },
+        "lat": 10.7827282,
+        "lon": 106.6635361,
+        "heading": 86.10289,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 24.5
+        },
+        "lat": 10.7827272,
+        "lon": 106.6635361,
+        "heading": 86.0905762,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 24.75
+        },
+        "lat": 10.7827253,
+        "lon": 106.6635361,
+        "heading": 86.0746002,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 25.0
+        },
+        "lat": 10.7827244,
+        "lon": 106.6635361,
+        "heading": 86.0803452,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 25.25
+        },
+        "lat": 10.7827234,
+        "lon": 106.6635361,
+        "heading": 86.0887222,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 25.5
+        },
+        "lat": 10.7827215,
+        "lon": 106.6635361,
+        "heading": 86.0959473,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 25.75
+        },
+        "lat": 10.7827206,
+        "lon": 106.6635361,
+        "heading": 86.0913925,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 26.0
+        },
+        "lat": 10.7827187,
+        "lon": 106.6635361,
+        "heading": 86.090004,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 26.25
+        },
+        "lat": 10.7827177,
+        "lon": 106.6635361,
+        "heading": 86.1114578,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 26.5
+        },
+        "lat": 10.7827158,
+        "lon": 106.6635361,
+        "heading": 86.1127319,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 26.75
+        },
+        "lat": 10.7827148,
+        "lon": 106.6635361,
+        "heading": 86.105751,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 27.0
+        },
+        "lat": 10.7827129,
+        "lon": 106.6635361,
+        "heading": 86.090126,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 27.25
+        },
+        "lat": 10.782711,
+        "lon": 106.6635284,
+        "heading": 86.104126,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 27.5
+        },
+        "lat": 10.7827101,
+        "lon": 106.6635284,
+        "heading": 86.1176834,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 27.75
+        },
+        "lat": 10.7827082,
+        "lon": 106.6635361,
+        "heading": 86.1256638,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 28.0
+        },
+        "lat": 10.7827063,
+        "lon": 106.6635361,
+        "heading": 86.1332855,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 28.25
+        },
+        "lat": 10.7827044,
+        "lon": 106.6635361,
+        "heading": 86.1336441,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 28.5
+        },
+        "lat": 10.7827024,
+        "lon": 106.6635361,
+        "heading": 86.1203079,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 28.75
+        },
+        "lat": 10.7827015,
+        "lon": 106.6635361,
+        "heading": 86.1141205,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 29.0
+        },
+        "lat": 10.7826986,
+        "lon": 106.6635361,
+        "heading": 86.1236877,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 29.25
+        },
+        "lat": 10.7826977,
+        "lon": 106.6635361,
+        "heading": 86.1281509,
+        "ignition": false,
+        "doorOpen": true,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 29.5
+        },
+        "lat": 10.7826958,
+        "lon": 106.6635361,
+        "heading": 86.1368408,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 29.75
+        },
+        "lat": 10.7826939,
+        "lon": 106.6635361,
+        "heading": 86.1345062,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 30.0
+        },
+        "lat": 10.782692,
+        "lon": 106.6635361,
+        "heading": 86.140213,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 30.25
+        },
+        "lat": 10.782691,
+        "lon": 106.6635361,
+        "heading": 86.1366959,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 30.5
+        },
+        "lat": 10.7826891,
+        "lon": 106.6635361,
+        "heading": 86.1295776,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 30.75
+        },
+        "lat": 10.7826881,
+        "lon": 106.6635437,
+        "heading": 86.1077728,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 31.0
+        },
+        "lat": 10.7826862,
+        "lon": 106.6635437,
+        "heading": 86.0830765,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 31.25
+        },
+        "lat": 10.7826843,
+        "lon": 106.6635437,
+        "heading": 86.095726,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 31.5
+        },
+        "lat": 10.7826834,
+        "lon": 106.6635437,
+        "heading": 86.0943069,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 31.75
+        },
+        "lat": 10.7826815,
+        "lon": 106.6635437,
+        "heading": 86.0934143,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 32.0
+        },
+        "lat": 10.7826796,
+        "lon": 106.6635513,
+        "heading": 86.0985794,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 32.25
+        },
+        "lat": 10.7826786,
+        "lon": 106.6635513,
+        "heading": 86.1121216,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 32.5
+        },
+        "lat": 10.7826777,
+        "lon": 106.6635513,
+        "heading": 86.1161575,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 32.75
+        },
+        "lat": 10.7826757,
+        "lon": 106.663559,
+        "heading": 86.1046677,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 33.0
+        },
+        "lat": 10.7826738,
+        "lon": 106.663559,
+        "heading": 86.1027145,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    },
+    {
+        "id": 111205,
+        "date": {
+            "day": 8,
+            "month": 6,
+            "year": 26
+        },
+        "utc": {
+            "hours": 16,
+            "minutes": 1,
+            "seconds": 33.25
+        },
+        "lat": 10.7826729,
+        "lon": 106.6635666,
+        "heading": 86.1041412,
+        "ignition": false,
+        "doorOpen": false,
+        "ac": false
+    }
+]

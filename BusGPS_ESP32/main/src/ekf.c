@@ -143,7 +143,7 @@ void ekf_init(float init_roll, float init_pitch, float init_yaw){
 }
 
 
-void ekf_set_origin(float init_Lat_origin, float init_Lon_origin){ //set origin for NE internal frame
+void ekf_set_origin(float init_Lat_origin, float init_Lon_origin, float SOG, float COG){ //set origin for NE internal frame
     //set 0 origin
     Lat_origin = init_Lat_origin;
 	Lon_origin = init_Lon_origin;
@@ -151,6 +151,38 @@ void ekf_set_origin(float init_Lat_origin, float init_Lon_origin){ //set origin 
     //set position state back to 0
     x[POS_N_IDX] = 0;
     x[POS_E_IDX] = 0;
+
+    SOG = SOG / 1.94384f; //SOG is in knots, convert it to m/s
+    COG = COG * (M_PI / 180.0f); //COG is in degree, convert it to radians for trigonometry functions
+
+    //calculate vel_N and vel_E vector fron COG and SOG
+    float vel_N_measure = SOG * cosf(COG);
+    float vel_E_measure = SOG * sinf(COG);
+    
+    //reset velocity
+    x[VEL_N_IDX] = vel_N_measure;
+    x[VEL_E_IDX] = vel_E_measure;
+
+    // 4. Reset the Covariance (P) for these states
+    // We set the diagonal elements to a small initial uncertainty 
+    // and clear the cross-correlations (off-diagonals) for these rows/cols.
+    for (int i = 0; i < NUM_STATES; i++) {
+        // Clear the cross-correlations for Pos/Vel against all other states
+        P[POS_N_IDX * NUM_STATES + i] = 0.0f;
+        P[POS_E_IDX * NUM_STATES + i] = 0.0f;
+        P[VEL_N_IDX * NUM_STATES + i] = 0.0f;
+        P[VEL_E_IDX * NUM_STATES + i] = 0.0f;
+        
+        P[i * NUM_STATES + POS_N_IDX] = 0.0f;
+        P[i * NUM_STATES + POS_E_IDX] = 0.0f;
+        P[i * NUM_STATES + VEL_N_IDX] = 0.0f;
+        P[i * NUM_STATES + VEL_E_IDX] = 0.0f;
+    }
+
+    P[POS_N_IDX * NUM_STATES + POS_N_IDX] = 10.0f; // e.g., 2.5m variance
+    P[POS_E_IDX * NUM_STATES + POS_E_IDX] = 10.0f;
+    P[VEL_N_IDX * NUM_STATES + VEL_N_IDX] = 1.0f; // e.g., 0.1m/s variance
+    P[VEL_E_IDX * NUM_STATES + VEL_E_IDX] = 1.0f;
 
     EKF_Origin_Set = true;
 }

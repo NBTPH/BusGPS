@@ -9,7 +9,7 @@ extern ekf_t KalmanFilter;
 extern bool EKF_Origin_Set;
 
 void ekf_init(float init_roll, float init_pitch, float init_yaw);
-void ekf_set_origin(float init_Lat_origin, float init_Lon_origin);
+void ekf_set_origin(float init_Lat_origin, float init_Lon_origin, float SOG, float COG);
 
 void ekf_estimate(MPU6050_Sensor_t IMU, float timestep);
 void ekf_update_tilt(MPU6050_Sensor_t IMU);

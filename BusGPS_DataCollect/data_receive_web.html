@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:,">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Tracker Receiving Debug</title>
+    
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto;}
+        .data-label { font-weight: bold; margin-right: 10px; }
+        .status-bad { color: red; font-weight: bold; }
+        .status-good { color: green; font-weight: bold; }
+        .status-calib { 
+            color: #f0ad4e; 
+            font-weight: bold; 
+            animation: pulse 1.5s infinite; 
+        }
+        ul { list-style-type: none; padding-left: 0; }
+        li { padding: 5px 0; border-bottom: 1px solid #eee; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <h2>Vehicle Tracker</h2>
+    
+    <p class="data-label">System Status: <span id="Status" class="status-bad">Connecting...</span></p>
+
+    <h3>Location Data</h3>
+    <ul>
+        <li><span class="data-label">Vehicle ID:</span> <span id="Vehicle_ID">--</span></li>
+        <li><span class="data-label">Date:</span> <span id="Date">--</span></li>
+        <li><span class="data-label">UTC Time:</span> <span id="UTC">--</span></li>
+        <li><span class="data-label">Latitude:</span> <span id="Lat">--</span></li>
+        <li><span class="data-label">Longitude:</span> <span id="Lon">--</span></li>
+        <li><span class="data-label">Heading:</span> <span id="Heading">--</span>&deg;</li>
+    </ul>
+
+    <h3>Vehicle Status</h3>
+    <ul>
+        <li><span class="data-label">Ignition:</span> <span id="Ignition">--</span></li>
+        <li><span class="data-label">Doors:</span> <span id="Door">--</span></li>
+        <li><span class="data-label">A/C:</span> <span id="AC">--</span></li>
+    </ul>
+
+    <script>
+        const brokerUrl = ''; 
+        const mqttTopic = '';
+        const options = {
+            clientId: 'web_client_' + Math.random().toString(16).substr(2, 8),
+            username: '',
+            password: '',
+        };
+
+        const statusEl = document.getElementById('Status');
+        const vehicleIdEl = document.getElementById('Vehicle_ID');
+        const dateEl = document.getElementById('Date');
+        const utcEl = document.getElementById('UTC');
+        const latEl = document.getElementById('Lat');
+        const lonEl = document.getElementById('Lon');
+        const headingEl = document.getElementById('Heading');
+        const ignitionEl = document.getElementById('Ignition');
+        const doorEl = document.getElementById('Door');
+        const acEl = document.getElementById('AC');
+
+        const client = mqtt.connect(brokerUrl, options);
+
+        client.on('connect', function () {
+            console.log('Connected to MQTT');
+            statusEl.textContent = 'Connected & Waiting for Data';
+            statusEl.className = 'status-calib';
+            
+            client.subscribe(mqttTopic, function (err) {
+                if (err) {
+                    console.error('Subscription error:', err);
+                }
+            });
+        });
+
+        client.on('error', function (error) {
+            console.error('Connection failed:', error);
+            statusEl.textContent = 'Connection Error';
+            statusEl.className = 'status-bad';
+        });
+
+        function padZero(num) {
+            return num < 10 ? '0' + num : num;
+        }
+
+        function convertToDMS(decimal, isLat) {
+            const absolute = Math.abs(decimal);
+            const degrees = Math.floor(absolute);
+            const minutesNotTruncated = (absolute - degrees) * 60;
+            const minutes = Math.floor(minutesNotTruncated);
+            const seconds = ((minutesNotTruncated - minutes) * 60).toFixed(2);
+
+            let direction = "";
+            if(isLat){
+                direction = decimal >= 0 ? "N" : "S";
+            } else {
+                direction = decimal >= 0 ? "E" : "W";
+            }
+
+            return `${degrees}° ${minutes}' ${seconds}" ${direction}`;
+        }
+
+        client.on('message', function (topic, message) {
+            statusEl.textContent = 'Receiving Data';
+            statusEl.className = 'status-good';
+
+            const payloadStr = message.toString();
+            
+            const startIdx = payloadStr.indexOf('{');
+            
+            if (startIdx === -1) {
+                console.error("Error: No valid JSON payload found in the log string.");
+                return;
+            }
+
+            try {
+                const jsonString = payloadStr.substring(startIdx).trim();
+                const data = JSON.parse(jsonString);
+
+                if (data.id !== undefined) vehicleIdEl.textContent = data.id;
+                
+                if (data.date) {
+                    dateEl.textContent = `${padZero(data.date.day)}/${padZero(data.date.month)}/20${data.date.year}`;
+                }
+                
+                if (data.utc) {
+                    utcEl.textContent = `${padZero(data.utc.hours)}:${padZero(data.utc.minutes)}:${padZero(Math.floor(data.utc.seconds))}`;
+                }
+                
+                if (data.lat !== undefined) latEl.textContent = convertToDMS(data.lat, true);
+                if (data.lon !== undefined) lonEl.textContent = convertToDMS(data.lon, false);
+                if (data.heading !== undefined) headingEl.textContent = data.heading.toFixed(2);
+                
+                if (data.ignition !== undefined) ignitionEl.textContent = data.ignition ? "ON" : "OFF";
+                if (data.doorOpen !== undefined) doorEl.textContent = data.doorOpen ? "Open" : "Closed";
+                if (data.ac !== undefined) acEl.textContent = data.ac ? "ON" : "OFF";
+
+            } catch (err) {
+                console.error("Failed to parse JSON:", err);
+            }
+        });
+    </script>
+</body>
+</html>
